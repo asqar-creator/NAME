@@ -1,19 +1,22 @@
-// Стартовый экран твоего проекта — пока он простой и пустой.
-// Когда понадобятся вход и база данных, готовые примеры уже лежат рядом:
-//   src/components/Auth.tsx      — вход / регистрация
-//   src/components/Entries.tsx   — чтение и запись в базу
-// Просто попроси Codex подключить их на экран.
+import { useEffect, useState } from 'react';
+import { GamePage } from './pages/GamePage';
+import { HomePage } from './pages/HomePage';
 
 export default function App() {
-  return (
-    <main className="container">
-      <section className="hello">
-        <h1>Привет! 🚀</h1>
-        <p>Это твой проект. Пока тут пусто — самое интересное впереди.</p>
-        <p className="hello__hint">
-          Открой Codex и опиши свою идею — этот экран станет твоим приложением.
-        </p>
-      </section>
-    </main>
-  );
+  const [path, setPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const updatePath = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', updatePath);
+    return () => window.removeEventListener('popstate', updatePath);
+  }, []);
+
+  const navigate = (nextPath: string) => {
+    window.history.pushState({}, '', nextPath);
+    setPath(nextPath);
+  };
+
+  return path === '/game'
+    ? <GamePage onHome={() => navigate('/')} />
+    : <HomePage onPlay={() => navigate('/game')} />;
 }
