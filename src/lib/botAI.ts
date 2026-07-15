@@ -1,48 +1,66 @@
 import { GameState, MINIONS, MinionKind } from './game';
 
-function minion(name: string) {
-  return MINIONS.find((kind) => kind.name === name);
-}
+const find = (name: string) => MINIONS.find((kind) => kind.name === name);
+const canBuy = (kind: MinionKind | undefined, coins: number): kind is MinionKind => Boolean(kind && kind.cost <= coins);
 
-function affordable(kind: MinionKind | undefined, coins: number): kind is MinionKind {
-  return kind !== undefined && kind.cost <= coins;
+export function useBotSpell(game: GameState) {
+  const attackers = game.units.filter((unit) => unit.side === 'player' && unit.name !== 'Тень');
+  const dangerous = attackers.filter((unit) => unit.x >= 58);
+  if (dangerous.length >= 5 && game.enemyCoins >= 55) {
+    dangerous.forEach((unit) => { unit.health -= 8; });
+    game.playerBase -= 5;
+    game.enemyCoins -= 55;
+    game.effects.push({ id: game.nextId++, kind: 'meteor', side: 'enemy', x: 28, life: 1.2 });
+    return true;
+  }
+  if (dangerous.length >= 3 && game.enemyCoins >= 18) {
+    dangerous.forEach((unit) => { unit.health -= 3; });
+    game.enemyCoins -= 18;
+    game.effects.push({ id: game.nextId++, kind: 'log', side: 'enemy', x: 50, life: 1.8 });
+    return true;
+  }
+  return false;
 }
 
 export function chooseBotMinion(game: GameState): MinionKind | null {
-  const attackers = game.units.filter((unit) => unit.side === 'player');
-  const danger = attackers.filter((unit) => unit.x >= 62);
-  const nearbyGroup = danger.filter((unit) => unit.x >= 72);
-  const hasDragon = attackers.some((unit) => unit.name === 'Дракон');
-  const rangedArmy = attackers.filter((unit) => unit.projectile).length;
+  const players = game.units.filter((unit) => unit.side === 'player' && unit.name !== 'Тень');
+  const allies = game.units.filter((unit) => unit.side === 'enemy' && unit.name !== 'Тень');
+  const danger = players.filter((unit) => unit.x >= 60);
+  const closeDanger = players.filter((unit) => unit.x >= 72);
+  const playerRanged = players.filter((unit) => unit.projectile).length;
+  const allyTanks = allies.filter((unit) => unit.hp >= 16 && !unit.healer);
+  const hasHealer = allies.some((unit) => unit.healer);
 
-  const bomber = minion('Бомбардировщик');
-  if (nearbyGroup.length >= 3 && affordable(bomber, game.enemyCoins)) return bomber;
+  const bomber = find('Бомбардировщик');
+  if (closeDanger.length >= 3 && canBuy(bomber, game.enemyCoins)) return bomber;
 
-  const iceMage = minion('Ледяная волшебница');
-  if (hasDragon && affordable(iceMage, game.enemyCoins)) return iceMage;
+  const iceMage = find('Ледяная волшебница');
+  if (players.some((unit) => unit.name === 'Дракон') && canBuy(iceMage, game.enemyCoins)) return iceMage;
 
-  const ninja = minion('Ниндзя');
-  if (rangedArmy >= 2 && affordable(ninja, game.enemyCoins)) return ninja;
+  const ninja = find('Ниндзя');
+  if (playerRanged >= 2 && canBuy(ninja, game.enemyCoins)) return ninja;
 
-  if (danger.length > 0) {
-    const defenders = [minion('Титан'), minion('Страж'), minion('Рыцарь')]
-      .filter((kind): kind is MinionKind => affordable(kind, game.enemyCoins));
-    if (defenders.length) return defenders[0];
+  if (danger.length && !allyTanks.length) {
+    const tank = [find('Каменный голем'), find('Титан'), find('Страж')].find((kind) => canBuy(kind, game.enemyCoins));
+    if (tank) return tank;
   }
 
-  const warlock = minion('Колдун теней');
-  if (game.enemyCoins >= 90 && affordable(warlock, game.enemyCoins)) return warlock;
+  const healer = find('Целительница');
+  if (allies.length >= 2 && allyTanks.length > 0 && !hasHealer && canBuy(healer, game.enemyCoins)) return healer;
 
-  const dragon = minion('Дракон');
-  if (game.enemyCoins >= 50 && game.enemyBase > 35 && affordable(dragon, game.enemyCoins)) return dragon;
+  const fireMage = find('Огненная волшебница');
+  if (allyTanks.length > 0 && canBuy(fireMage, game.enemyCoins) && allies.filter((unit) => unit.projectile).length < 2) return fireMage;
 
-  if (attackers.length === 0 && game.enemyCoins < 50 && game.enemyBase > 55) return null;
+  const ram = find('Таранщик');
+  if (players.length <= 1 && allies.some((unit) => unit.x < 65) && canBuy(ram, game.enemyCoins)) return ram;
 
-  const choices = MINIONS.filter((kind) => kind.cost <= game.enemyCoins && kind.cost <= 30);
-  if (!choices.length) return null;
-  return choices.sort((a, b) => {
-    const scoreA = a.damage * 2 + a.hp * .35 + a.speed;
-    const scoreB = b.damage * 2 + b.hp * .35 + b.speed;
-    return scoreB - scoreA;
-  })[0];
+  const warlock = find('Колдун теней');
+  if (game.enemyCoins >= 90 && game.enemyBase > 45 && canBuy(warlock, game.enemyCoins)) return warlock;
+
+  const dragon = find('Дракон');
+  if (game.enemyCoins >= 50 && game.enemyBase > 35 && canBuy(dragon, game.enemyCoins)) return dragon;
+
+  if (!players.length && game.enemyCoins < 50 && game.enemyBase > 55) return null;
+  const choices = MINIONS.filter((kind) => kind.cost <= game.enemyCoins && kind.cost <= 34 && !kind.healer);
+  return choices.sort((a, b) => (b.damage * 2.3 + b.hp * .3 + b.speed) - (a.damage * 2.3 + a.hp * .3 + a.speed))[0] ?? null;
 }

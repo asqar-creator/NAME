@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createDragonRider, createShadow, createUnit, GameState, initialGame, ItemKind, MINIONS, Projectile, Side, Unit } from './game';
-import { chooseBotMinion } from './botAI';
+import { chooseBotMinion, useBotSpell } from './botAI';
 
 export type GameMode = 'bot' | 'local';
 
 function shoot(game: GameState, unit: Unit) {
   if (!unit.projectile || unit.attackTimer < 1) return;
-  const shot: Projectile = { id: game.nextId++, side: unit.side, x: unit.x, damage: unit.damage, kind: unit.projectile };
+  const shot: Projectile = { id: game.nextId++, side: unit.side, x: unit.x, damage: unit.damage, kind: unit.projectile, hitsSpectral: ['Огненная волшебница', 'Ледяная волшебница', 'Колдун теней'].includes(unit.name) };
   game.projectiles.push(shot);
   unit.attackTimer = 0;
 }
@@ -15,10 +15,10 @@ function moveProjectiles(game: GameState, dt: number) {
   const active: Projectile[] = [];
   for (const shot of game.projectiles) {
     shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'arrow' ? 18 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
-    const target = game.units.find((unit) => unit.side !== shot.side && Math.abs(unit.x - shot.x) < 2);
+    const target = game.units.find((unit) => unit.side !== shot.side && (!unit.spectral || shot.hitsSpectral) && Math.abs(unit.x - shot.x) < 2);
     if (target) {
       if (shot.kind === 'bomb') {
-        game.units.filter((unit) => unit.side !== shot.side && Math.abs(unit.x - shot.x) < 6).forEach((unit) => { unit.health -= shot.damage; });
+        game.units.filter((unit) => unit.side !== shot.side && !unit.spectral && Math.abs(unit.x - shot.x) < 6).forEach((unit) => { unit.health -= shot.damage; });
         game.explosions.push({ id: game.nextId++, x: shot.x, life: .65 });
       }
       else target.health -= shot.damage;
@@ -40,12 +40,23 @@ function fight(game: GameState, unit: Unit, dt: number) {
       if (unit.attackTimer >= 1) { wounded.health = Math.min(wounded.hp, wounded.health + 3); unit.attackTimer = 0; }
       return;
     }
-    const safeEdge = unit.side === 'player' ? 70 : 30;
-    if ((unit.side === 'player' && unit.x < safeEdge) || (unit.side === 'enemy' && unit.x > safeEdge)) unit.x += (unit.side === 'player' ? 1 : -1) * unit.speed * dt;
+    const escorts = game.units.filter((ally) => ally.side === unit.side && ally.id !== unit.id && !ally.healer && ally.name !== 'Тень' && ally.health > 0);
+    if (!escorts.length) {
+      const home = unit.side === 'player' ? 8 : 92;
+      unit.x += Math.sign(home - unit.x) * unit.speed * dt;
+      return;
+    }
+    const front = escorts.sort((a, b) => unit.side === 'player' ? b.x - a.x : a.x - b.x)[0];
+    const followPoint = front.x + (unit.side === 'player' ? -8 : 8);
+    if (unit.side === 'player' && unit.x < followPoint) unit.x = Math.min(followPoint, unit.x + unit.speed * dt);
+    if (unit.side === 'player' && unit.x > followPoint) unit.x = Math.max(followPoint, unit.x - unit.speed * dt);
+    if (unit.side === 'enemy' && unit.x > followPoint) unit.x = Math.max(followPoint, unit.x - unit.speed * dt);
+    if (unit.side === 'enemy' && unit.x < followPoint) unit.x = Math.min(followPoint, unit.x + unit.speed * dt);
     return;
   }
   const range = unit.projectile ? 18 : 4;
-  const target = game.units.filter((foe) => foe.side !== unit.side && foe.health > 0)
+  const canAttackGhost = ['Огненная волшебница', 'Ледяная волшебница', 'Колдун теней'].includes(unit.name);
+  const target = game.units.filter((foe) => foe.side !== unit.side && foe.health > 0 && (!foe.spectral || canAttackGhost))
     .sort((a, b) => Math.abs(a.x - unit.x) - Math.abs(b.x - unit.x))[0];
   if (unit.name === 'Таранщик' && target && Math.abs(target.x - unit.x) < 4) {
     if (unit.attackTimer >= .8) { target.health -= unit.damage; unit.health -= 6; unit.attackTimer = 0; }
@@ -79,9 +90,12 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
   if (previous.winner) return previous;
   const game = { ...previous, units: previous.units.map((unit) => ({ ...unit })), projectiles: previous.projectiles.map((shot) => ({ ...shot })), fallenUnits: previous.fallenUnits.map((unit) => ({ ...unit, life: unit.life - dt })), explosions: previous.explosions.map((effect) => ({ ...effect, life: effect.life - dt })), effects: previous.effects.map((effect) => ({ ...effect, life: effect.life - dt })) };
   game.coinTimer += dt; game.baseTimer += dt; game.enemyTimer += dt;
+  game.heroBanCooldown = Math.max(0, game.heroBanCooldown - dt);
+  game.enemyHeroBanCooldown = Math.max(0, game.enemyHeroBanCooldown - dt);
   if (game.coinTimer >= 1) { game.coins += 2; game.enemyCoins += 2; game.coinTimer -= 1; }
-  if (mode === 'bot' && game.enemyTimer >= 1.8) {
-    const kind = chooseBotMinion(game);
+  if (mode === 'bot' && game.enemyTimer >= 1.25) {
+    const usedSpell = useBotSpell(game);
+    const kind = usedSpell ? null : chooseBotMinion(game);
     if (kind) { game.units.push(createUnit(kind, 'enemy', game.nextId++)); game.enemyCoins -= kind.cost; }
     game.enemyTimer = 0;
   }
@@ -94,6 +108,22 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
     fight(game, unit, dt);
   });
   moveProjectiles(game, dt);
+  if (game.heroBanCooldown <= 0) {
+    const banned = game.units.filter((unit) => unit.side === 'enemy' && unit.x <= 27).sort((a, b) => a.x - b.x)[0];
+    if (banned) {
+      game.units = game.units.filter((unit) => unit.id !== banned.id);
+      game.explosions.push({ id: game.nextId++, x: banned.x, life: .65 });
+      game.heroBanCooldown = 15;
+    }
+  }
+  if (game.enemyHeroBanCooldown <= 0) {
+    const banned = game.units.filter((unit) => unit.side === 'player' && unit.x >= 73).sort((a, b) => b.x - a.x)[0];
+    if (banned) {
+      game.units = game.units.filter((unit) => unit.id !== banned.id);
+      game.explosions.push({ id: game.nextId++, x: banned.x, life: .65 });
+      game.enemyHeroBanCooldown = 15;
+    }
+  }
   if (game.baseTimer >= 1) {
     const left = game.units.find((unit) => unit.side === 'enemy' && unit.x <= 25);
     const right = game.units.find((unit) => unit.side === 'player' && unit.x >= 75);
@@ -102,8 +132,8 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
     game.baseTimer = 0;
   }
   const defeated = game.units.filter((unit) => unit.health <= 0);
-  game.coins += defeated.filter((unit) => unit.side === 'enemy').length * 3;
-  game.enemyCoins += defeated.filter((unit) => unit.side === 'player').length * 3;
+  game.coins += defeated.filter((unit) => unit.side === 'enemy' && unit.name !== 'Тень').length * 3;
+  game.enemyCoins += defeated.filter((unit) => unit.side === 'player' && unit.name !== 'Тень').length * 3;
   game.fallenUnits.push(...defeated.map((unit) => ({ id: unit.id, side: unit.side, x: unit.x, color: unit.color, icon: unit.icon, life: .8 })));
   defeated.filter((unit) => unit.name === 'Дракон').forEach((dragon) => {
     game.units.push(createDragonRider(dragon.side, game.nextId++, dragon.x));
@@ -130,9 +160,9 @@ export function useBattle(mode: GameMode) {
     if (current.coins < costs[kind]) return current;
     const game = { ...current, coins: current.coins - costs[kind], units: current.units.map((unit) => ({ ...unit })), effects: [...current.effects] };
     const enemies = game.units.filter((unit) => unit.side === 'enemy');
-    if (kind === 'log') enemies.forEach((unit) => { unit.health -= 3; });
+    if (kind === 'log') enemies.filter((unit) => !unit.spectral).forEach((unit) => { unit.health -= 3; });
     if (kind === 'potion') game.units.filter((unit) => unit.side === 'player').forEach((unit) => { unit.health = Math.min(unit.hp, unit.health + 6); });
-    if (kind === 'meteor') { enemies.forEach((unit) => { unit.health -= 8; }); game.enemyBase -= 5; }
+    if (kind === 'meteor') { enemies.filter((unit) => !unit.spectral).forEach((unit) => { unit.health -= 8; }); game.enemyBase -= 5; }
     game.effects.push({ id: game.nextId++, kind, side: 'player', x: kind === 'potion' ? 35 : kind === 'meteor' ? 72 : 50, life: kind === 'log' ? 1.8 : kind === 'meteor' ? 1.2 : .9 });
     return game;
   }), []);

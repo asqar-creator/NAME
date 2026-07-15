@@ -3,7 +3,7 @@ import { Battlefield } from '../components/Battlefield';
 import { MinionShop } from '../components/MinionShop';
 import { BattleItems } from '../components/BattleItems';
 import { useBattle } from '../lib/useBattle';
-import { playMinionVoice, startGameMusic, stopGameMusic } from '../lib/gameAudio';
+import { startGameMusic, stopGameMusic } from '../lib/gameAudio';
 
 export function GamePage({ onHome }: { onHome: () => void }) {
   const [mode, setMode] = useState<'bot' | 'local'>('bot');
@@ -24,8 +24,8 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     <Battlefield game={game} />
     <BattleItems coins={game.coins} disabled={finished} onUse={useItem} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
-      <MinionShop coins={game.coins} disabled={finished} onSummon={(index) => { summon(index, 'player'); if (soundOn) playMinionVoice(); }} />
-      {mode === 'local' && <MinionShop title="Красный игрок" enemy coins={game.enemyCoins} disabled={finished} onSummon={(index) => { summon(index, 'enemy'); if (soundOn) playMinionVoice(); }} />}
+      <MinionShop coins={game.coins} disabled={finished} onSummon={(index) => summon(index, 'player')} />
+      {mode === 'local' && <MinionShop title="Красный игрок" enemy coins={game.enemyCoins} disabled={finished} onSummon={(index) => summon(index, 'enemy')} />}
     </div>
     {finished && <div className="result" role="dialog" aria-modal="true"><div className="result__card">
       <span>{game.winner === 'player' ? '🏆' : '💥'}</span>

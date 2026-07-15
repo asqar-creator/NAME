@@ -9,6 +9,7 @@ export type MinionKind = {
   gender: CharacterGender;
   healer?: boolean;
   projectile?: ProjectileKind;
+  spectral?: boolean;
 };
 
 export type Unit = MinionKind & {
@@ -16,7 +17,7 @@ export type Unit = MinionKind & {
 };
 
 export type Projectile = {
-  id: number; side: Side; x: number; damage: number; kind: ProjectileKind;
+  id: number; side: Side; x: number; damage: number; kind: ProjectileKind; hitsSpectral?: boolean;
 };
 
 export type FallenUnit = {
@@ -31,6 +32,7 @@ export type GameState = {
   coins: number; enemyCoins: number; playerBase: number; enemyBase: number;
   units: Unit[]; projectiles: Projectile[]; fallenUnits: FallenUnit[]; explosions: Explosion[]; effects: BattleEffect[]; winner: Winner; nextId: number;
   coinTimer: number; baseTimer: number; enemyTimer: number;
+  heroBanCooldown: number; enemyHeroBanCooldown: number;
 };
 
 export const MAX_BASE_HP = 100;
@@ -50,15 +52,16 @@ export const MINIONS: MinionKind[] = [
   { name: 'Бомбардировщик', icon: '💣', cost: 30, hp: 10, damage: 4, speed: 2.4, color: '#59616c', gender: 'boy', projectile: 'bomb' },
   { name: 'Колдун теней', icon: '🔮', cost: 90, hp: 18, damage: 5, speed: 1.7, color: '#5b367e', gender: 'boy', projectile: 'shadoworb' },
   { name: 'Целительница', icon: '💚', cost: 28, hp: 12, damage: 0, speed: 2.5, color: '#e9f4ef', gender: 'girl', healer: true },
-  { name: 'Таранщик', icon: '🪵', cost: 34, hp: 18, damage: 9, speed: 7.2, color: '#8b5a2b', gender: 'boy' },
+  { name: 'Таранщик', icon: '🪵', cost: 34, hp: 18, damage: 9, speed: 9, color: '#8b5a2b', gender: 'boy' },
   { name: 'Копейщица', icon: '➶', cost: 15, hp: 8, damage: 3, speed: 3.7, color: '#4e9a72', gender: 'girl', projectile: 'arrow' },
   { name: 'Каменный голем', icon: '🗿', cost: 42, hp: 38, damage: 5, speed: 1, color: '#777d82', gender: 'boy' },
+  { name: 'Призрак', icon: '👻', cost: 36, hp: 16, damage: 4, speed: 3.2, color: '#b9e8ef', gender: 'boy', spectral: true },
 ];
 
 export const initialGame = (): GameState => ({
   coins: 20, enemyCoins: 20, playerBase: MAX_BASE_HP, enemyBase: MAX_BASE_HP,
   units: [], projectiles: [], fallenUnits: [], explosions: [], effects: [], winner: null, nextId: 1,
-  coinTimer: 0, baseTimer: 0, enemyTimer: 0,
+  coinTimer: 0, baseTimer: 0, enemyTimer: 0, heroBanCooldown: 0, enemyHeroBanCooldown: 0,
 });
 
 export function createUnit(kind: MinionKind, side: Side, id: number): Unit {
