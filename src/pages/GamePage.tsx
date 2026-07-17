@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Battlefield } from '../components/Battlefield';
 import { MinionShop } from '../components/MinionShop';
 import { BattleItems } from '../components/BattleItems';
@@ -14,14 +14,17 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [onlineRole, setOnlineRole] = useState<ClashRole>('host');
   const [soundOn, setSoundOn] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [level, setLevel] = useState(() => Number(localStorage.getItem('clash-bot-level')) || 1);
+  const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => localStorage.getItem('clash-askar-sword-unlocked') === 'yes');
-  const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest');
+  const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1);
   const applyOnlineAction = (action: ClashAction) => { if (action.type === 'summon') summon(action.index, action.side); else if (action.type === 'item') useItem(action.kind, action.side); else restart(); };
   const { connected, opponentOnline, sendAction, sendState } = useClashRoom(roomCode, onlineRole, applyOnlineAction, replaceGame);
   const finished = game.winner !== null;
   useEffect(() => () => stopGameMusic(), []);
   useEffect(() => { if (!finished) { setShowResult(false); return; } const delay = game.winner === 'player' ? 4200 : 0; const timer = window.setTimeout(() => setShowResult(true), delay); return () => window.clearTimeout(timer); }, [finished, game.winner]);
   useEffect(() => { if (game.winner === 'player' && !askarUnlocked) { localStorage.setItem('clash-askar-sword-unlocked', 'yes'); setAskarUnlocked(true); } }, [game.winner, askarUnlocked]);
+  useEffect(() => { if (!game.winner) { levelAdvanced.current = false; return; } if (mode === 'bot' && game.winner === 'player' && !levelAdvanced.current) { levelAdvanced.current = true; const next = level + 1; localStorage.setItem('clash-bot-level', String(next)); setLevel(next); } }, [game.winner, mode, level]);
   useEffect(() => { if (mode !== 'online' || onlineRole !== 'host' || !connected) return; const timer = window.setTimeout(() => sendState(game), 90); return () => window.clearTimeout(timer); }, [game, mode, onlineRole, connected, sendState]);
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const joinOnlineRoom = () => { const code = roomInput.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(); if (!code) return; setOnlineRole('guest'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
@@ -30,7 +33,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   return <main className="game-shell">
     <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
     <header className="game-header">
-      <div><span className="eyebrow">АВТОБИТВА</span><h1>Битва баз</h1><p>Создавай армию, прорвись через линию и уничтожь красную крепость.</p></div>
+      <div><span className="eyebrow">АВТОБИТВА · УРОВЕНЬ {level}</span><h1>Битва баз</h1><p>Создавай армию, прорвись через линию и уничтожь красную крепость. Каждый уровень сложнее предыдущего.</p></div>
       <div className="mode-switch">
         <button className={mode === 'bot' ? 'active' : ''} onClick={() => { setMode('bot'); restart(); }}>🤖 С ботом</button>
         <button className={mode === 'local' ? 'active' : ''} onClick={() => { setMode('local'); restart(); }}>👥 Вдвоём</button>

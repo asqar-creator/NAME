@@ -115,17 +115,17 @@ function fight(game: GameState, unit: Unit, dt: number) {
   unit.x += (unit.side === 'player' ? 1 : -1) * unit.speed * dt;
 }
 
-function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
+function simulate(previous: GameState, dt: number, mode: GameMode, level: number): GameState {
   if (previous.winner) return previous;
   const game = { ...previous, units: previous.units.map((unit) => ({ ...unit })), projectiles: previous.projectiles.map((shot) => ({ ...shot })), fallenUnits: previous.fallenUnits.map((unit) => ({ ...unit, life: unit.life - dt })), explosions: previous.explosions.map((effect) => ({ ...effect, life: effect.life - dt })), effects: previous.effects.map((effect) => ({ ...effect, life: effect.life - dt })) };
   game.coinTimer += dt; game.baseTimer += dt; game.enemyTimer += dt;
   game.heroBanCooldown = Math.max(0, game.heroBanCooldown - dt);
   game.enemyHeroBanCooldown = Math.max(0, game.enemyHeroBanCooldown - dt);
   if (game.coinTimer >= 1) { game.coins += 2; game.enemyCoins += 2; game.coinTimer -= 1; }
-  if (mode === 'bot' && game.enemyTimer >= 1.25) {
+  if (mode === 'bot' && game.enemyTimer >= Math.max(.45, 1.25 - (level - 1) * .07)) {
     const usedSpell = useBotSpell(game);
     const kind = usedSpell ? null : chooseBotMinion(game);
-    if (kind) { game.units.push(createUnit(kind, 'enemy', game.nextId++)); game.enemyCoins -= kind.cost; }
+    if (kind) { const enemy = createUnit(kind, 'enemy', game.nextId++); const power = 1 + Math.min(2, (level - 1) * .12); enemy.hp = Math.ceil(enemy.hp * power); enemy.health = enemy.hp; enemy.damage = Math.ceil(enemy.damage * power); enemy.speed *= 1 + Math.min(.65, (level - 1) * .04); game.units.push(enemy); game.enemyCoins -= kind.cost; }
     game.enemyTimer = 0;
   }
   game.units.forEach((unit) => {
@@ -191,9 +191,9 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
   return game;
 }
 
-export function useBattle(mode: GameMode, paused = false) {
+export function useBattle(mode: GameMode, paused = false, level = 1) {
   const [game, setGame] = useState(initialGame);
-  useEffect(() => { if (paused) return; const timer = window.setInterval(() => setGame((current) => simulate(current, .1, mode)), 100); return () => window.clearInterval(timer); }, [mode, paused]);
+  useEffect(() => { if (paused) return; const timer = window.setInterval(() => setGame((current) => simulate(current, .1, mode, level)), 100); return () => window.clearInterval(timer); }, [mode, paused, level]);
   const summon = useCallback((index: number, side: Side = 'player') => setGame((current) => {
     const kind = MINIONS[index]; const balance = side === 'player' ? current.coins : current.enemyCoins;
     if (!kind || current.winner || balance < kind.cost) return current;
