@@ -181,9 +181,9 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
   return game;
 }
 
-export function useBattle(mode: GameMode) {
+export function useBattle(mode: GameMode, paused = false) {
   const [game, setGame] = useState(initialGame);
-  useEffect(() => { const timer = window.setInterval(() => setGame((current) => simulate(current, .1, mode)), 100); return () => window.clearInterval(timer); }, [mode]);
+  useEffect(() => { if (paused) return; const timer = window.setInterval(() => setGame((current) => simulate(current, .1, mode)), 100); return () => window.clearInterval(timer); }, [mode, paused]);
   const summon = useCallback((index: number, side: Side = 'player') => setGame((current) => {
     const kind = MINIONS[index]; const balance = side === 'player' ? current.coins : current.enemyCoins;
     if (!kind || current.winner || balance < kind.cost) return current;
@@ -201,5 +201,5 @@ export function useBattle(mode: GameMode) {
     game.effects.push({ id: game.nextId++, kind, side: 'player', x: kind === 'potion' ? 35 : kind === 'meteor' ? 72 : 50, life: kind === 'log' ? 1.8 : kind === 'meteor' ? 1.2 : .9 });
     return game;
   }), []);
-  return { game, summon, useItem, restart: () => setGame(initialGame()) };
+  return { game, summon, useItem, restart: () => setGame(initialGame()), replaceGame: setGame };
 }
