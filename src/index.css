@@ -428,3 +428,30 @@ button { font: inherit; }
   box-shadow: none !important; transform: rotate(-3deg) !important;
   filter: drop-shadow(0 2px 1px #08111d);
 }
+.fighter3d__real-sword {
+  position: absolute;
+  z-index: 8;
+  right: -17px;
+  top: 19px;
+  width: 9px;
+  height: 36px;
+  transform: rotate(-32deg);
+  transform-origin: 50% 85%;
+  filter: drop-shadow(0 0 4px #9fdcff);
+}
+.fighter3d__real-sword i {
+  position: absolute;
+  left: 2px;
+  top: -18px;
+  width: 6px;
+  height: 30px;
+  border: 1px solid #d9f3ff;
+  border-radius: 60% 60% 2px 2px;
+  clip-path: polygon(50% 0,100% 18%,86% 100%,14% 100%,0 18%);
+  background: linear-gradient(90deg,#8295a7 0 20%,#f7fdff 48%,#a9c4d5 72%,#586b7c);
+}
+.fighter3d__real-sword b { position:absolute; left:-5px; top:10px; width:19px; height:5px; border-radius:4px; background:linear-gradient(#ffe081,#9a641c); box-shadow:0 1px 2px #321; }
+.fighter3d__real-sword em { position:absolute; left:2px; top:14px; width:6px; height:15px; border-radius:2px 2px 5px 5px; background:repeating-linear-gradient(0deg,#382019 0 3px,#815334 3px 5px); }
+.fighter3d--enemy .fighter3d__real-sword { transform: rotate(32deg) scaleX(-1); right: auto; left: -17px; }
+.fighter3d--sword-askar .fighter3d__model { animation: swordHeroRun .42s ease-in-out infinite alternate; }
+@keyframes swordHeroRun { from { translate:0 0; } to { translate:0 -2px; } }
