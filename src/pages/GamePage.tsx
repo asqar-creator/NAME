@@ -37,7 +37,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
         <button className={mode === 'online' ? 'active' : ''} onClick={() => setOnlineOpen(true)}>🌐 Онлайн</button>
       </div>
     </header>
-    <details className="game-story"><summary>📖 История «Клеш оф Минионс»</summary><p>Два королевства много лет хранили мир, пока Злой Аскар не похитил Кристалл Радости. Герой Аскар и его сестра Айжулдыз собрали армию минионов. Им нужно защитить синюю крепость, вернуть кристалл и остановить тёмную армию.</p></details>
+    <details className="game-story"><summary>📖 Новая история «Клеш оф Минионс»</summary><p>В ночь Великого Затмения Злой Аскар оживил Красную крепость и отправил тёмных двойников семьи захватить все королевства. Герой Аскар, Айжулдыз, Жансая, Мама и Папа объединились с минионами. Теперь им предстоит выдержать последнюю битву, освободить Кристалл Радости и вернуть свет каждой земле.</p></details>
     <Battlefield game={game} />
     {!(mode === 'online' && onlineRole === 'guest') && <BattleItems coins={game.coins} disabled={finished} onUse={(kind) => { useItem(kind); if (mode === 'online') sendAction({ type: 'item', kind }); }} />}
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
