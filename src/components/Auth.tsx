@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 
 type AuthMode = 'signin' | 'signup';
 
-export function Auth() {
+export function Auth({ onGuest }: { onGuest: () => void }) {
   const [mode, setMode] = useState<AuthMode>('signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,6 +81,7 @@ export function Auth() {
         <button className="google-auth-button" type="button" onClick={signInWithGoogle} disabled={busy}>
           <span aria-hidden="true">G</span> Войти через Google
         </button>
+        <button className="guest-auth-button" type="button" onClick={onGuest} disabled={busy}>🎮 Войти как гость</button>
 
         {message && <p className="auth-message" role="status">{message}</p>}
         <button className="auth-switch" type="button" onClick={switchMode}>

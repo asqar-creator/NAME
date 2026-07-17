@@ -11,6 +11,7 @@ import { MysteryTowerPage } from './pages/MysteryTowerPage';
 export default function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [session, setSession] = useState<Session | null>(null);
+  const [guest, setGuest] = useState(() => localStorage.getItem('games-guest-mode') === 'yes');
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
@@ -37,11 +38,11 @@ export default function App() {
   };
 
   if (!authReady) return <main className="auth-loading">Загрузка…</main>;
-  if (!session) return <Auth />;
+  if (!session && !guest) return <Auth onGuest={() => { localStorage.setItem('games-guest-mode', 'yes'); setGuest(true); }} />;
 
-  const logout = () => void supabase.auth.signOut();
+  const logout = () => { if (guest) { localStorage.removeItem('games-guest-mode'); setGuest(false); } else void supabase.auth.signOut(); };
 
-  const accountButton = <button className="account-logout" onClick={logout}>Выйти</button>;
+  const accountButton = <button className="account-logout" onClick={logout}>{guest ? 'Гость · Выйти' : 'Выйти'}</button>;
 
   let page = <HomePage onPlay={() => navigate('/game')} onAdventure={() => navigate('/adventure')} onMerge={() => navigate('/elemental-merge')} onTower={() => navigate('/mystery-tower')} />;
   if (path === '/game') page = <GamePage onHome={() => navigate('/')} />;
