@@ -343,3 +343,28 @@ button { font: inherit; }
 .tower-health { position: absolute; z-index: 5; left: 50%; top: 92px; translate: -50%; width: min(320px,60vw); display: grid; grid-template-columns: 90px 1fr; gap: 5px 8px; padding: 9px; border-radius: 11px; background: #0b1021cc; font-size: 11px; font-weight: 900; }.tower-health i { height: 10px; overflow: hidden; border-radius: 8px; background: #391d25; }.tower-health i b { display: block; height: 100%; background: #42c878; transition: width .2s; }.tower-health i b.monster { background: #e04848; }.tower-controls .tower-attack { position: absolute; left: 260px; bottom: 0; width: 70px; height: 52px; border-radius: 50%; font-size: 11px; font-weight: 900; background: #a83d3ddd; }
 .tower-save-status { position: absolute; z-index: 20; left: 50%; top: 165px; translate: -50%; padding: 12px 20px; border: 2px solid #79d993; border-radius: 12px; color: #eaffef; background: #183c27ee; font-weight: 900; box-shadow: 0 8px 30px #0007; }
 .home-page__hero-worlds { margin-top: 10px; background: linear-gradient(135deg,#b32d32,#311337) !important; }.hero-worlds { min-height: 100vh; overflow: hidden; color: white; background: radial-gradient(circle at 50% 80%,#b52d18,#210910 62%,#09040a); font-family: Arial,sans-serif; }.hero-worlds header { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px 25px; background: #120912dd; }.hero-worlds header button { padding: 9px 14px; border: 1px solid #fff5; border-radius: 9px; color: white; background: #ffffff16; }.hero-worlds header div { text-align: center; }.hero-worlds header h1 { margin: 2px; font-size: clamp(18px,3vw,30px); }.hero-worlds header small { color: #ffd36a; letter-spacing: 4px; }.hero-worlds__message { min-height: 24px; margin: 10px; color: #ffe8a5; text-align: center; font-weight: 900; }.hero-arena { position: relative; width: min(1000px,94vw); height: min(65vh,620px); margin: auto; overflow: hidden; border: 4px solid #9c563b; border-radius: 20px; background: linear-gradient(#35101c,#621b17 70%,#25100d); box-shadow: inset 0 0 70px #000,0 20px 60px #0009; }.hero-lava { position: absolute; inset: auto 0 0; height: 14%; color: #ffca35; background: #e64114; font-size: 36px; text-align: center; animation: lavaGlow .5s infinite alternate; }.hero-player { position: absolute; z-index: 5; translate: -50% -50%; font-size: 48px; transition: left .07s,top .07s; filter: drop-shadow(0 0 8px #53dfff); }.hero-player i { position: absolute; left: 32px; top: 20px; font-size: 28px; }.hell-lord { position: absolute; left: 80%; top: 55%; translate: -50% -50%; display: grid; justify-items: center; font-size: 100px; filter: drop-shadow(0 0 20px #ff3018); }.hell-lord span,.heaven-princess span { padding: 4px 8px; border-radius: 8px; background: #16080ddd; font-size: 13px; font-weight: 900; }.hell-lord i { width: 150px; height: 13px; overflow: hidden; border-radius: 10px; background: #1c1111; }.hell-lord i b { display: block; height: 100%; background: #e44335; transition: width .2s; }.heaven-princess { position: absolute; right: 8%; top: 8%; display: grid; justify-items: center; padding: 14px; border: 4px solid #8c6ba3; font-size: 55px; background: #9f74c144; }.heaven-princess.saved { border-color: #ffe580; box-shadow: 0 0 35px #fff28a; }.void-portal { position: absolute; left: 50%; bottom: 15%; translate: -50%; padding: 17px 24px; border: 2px solid #a67cff; border-radius: 50%; color: white; background: #160a24; font-size: 17px; font-weight: 900; box-shadow: 0 0 35px #8652d9; }.hero-worlds footer { padding: 12px; text-align: center; }.hero-victory { position: fixed; z-index: 15; left: 50%; bottom: 55px; translate: -50%; width: min(600px,85vw); padding: 14px 20px; border: 2px solid #ffe486; border-radius: 16px; color: #382e50; background: #fff7dbea; text-align: center; }.hero-victory h2,.hero-victory p { margin: 6px; }.hero-worlds--void .hero-arena { background: radial-gradient(circle,#301a4c,#030207 70%); }.hero-worlds--void .hero-lava { opacity: .15; } @keyframes lavaGlow { to { filter: brightness(1.4); } }
+.tower-online-button {
+  position: fixed;
+  z-index: 12;
+  right: 18px;
+  bottom: 18px;
+  padding: 12px 18px;
+  border: 2px solid #9de7c0;
+  border-radius: 999px;
+  background: #173f31;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tower-window input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  border: 2px solid #b8a47c;
+  border-radius: 10px;
+  font: inherit;
+  text-align: center;
+  text-transform: uppercase;
+}
