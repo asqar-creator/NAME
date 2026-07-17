@@ -416,3 +416,15 @@ button { font: inherit; }
 }
 .projectile--enemy.projectile--swordwave { transform: translateX(-50%) rotate(225deg); filter: drop-shadow(0 0 6px #ff5555) drop-shadow(0 0 12px #ff2222); }
 @keyframes swordWavePulse { from { scale: .85; opacity: .75; } to { scale: 1.18; opacity: 1; } }
+.fighter3d--father .fighter3d__hair {
+  left: 3px !important; top: -6px !important; width: 23px !important; height: 11px !important;
+  border-radius: 55% 48% 32% 25% !important; background: linear-gradient(145deg,#58372a,#241712) !important;
+  box-shadow: -2px 4px 0 #2d1b16, 3px -2px 0 #684333, 8px -3px 0 #3b241c, 14px -2px 0 #563326 !important; transform: rotate(-4deg) !important;
+}
+.fighter3d--sword-askar .fighter3d__hair {
+  left: 1px !important; top: -10px !important; width: 27px !important; height: 16px !important;
+  background: linear-gradient(135deg,#191f2d,#3e536d 65%,#17202d) !important;
+  clip-path: polygon(0 100%,5% 42%,23% 63%,31% 5%,45% 53%,62% 0,68% 55%,92% 24%,100% 100%) !important;
+  box-shadow: none !important; transform: rotate(-3deg) !important;
+  filter: drop-shadow(0 2px 1px #08111d);
+}

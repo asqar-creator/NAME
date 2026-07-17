@@ -16,7 +16,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [showResult, setShowResult] = useState(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => localStorage.getItem('clash-askar-sword-unlocked') === 'yes');
   const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest');
-  const applyOnlineAction = (action: ClashAction) => { if (action.type === 'summon') summon(action.index, action.side); else if (action.type === 'item') useItem(action.kind); else restart(); };
+  const applyOnlineAction = (action: ClashAction) => { if (action.type === 'summon') summon(action.index, action.side); else if (action.type === 'item') useItem(action.kind, action.side); else restart(); };
   const { connected, opponentOnline, sendAction, sendState } = useClashRoom(roomCode, onlineRole, applyOnlineAction, replaceGame);
   const finished = game.winner !== null;
   useEffect(() => () => stopGameMusic(), []);
@@ -39,7 +39,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     </header>
     <details className="game-story"><summary>📖 Новая история «Клеш оф Минионс»</summary><p>В ночь Великого Затмения Злой Аскар оживил Красную крепость и отправил тёмных двойников семьи захватить все королевства. Герой Аскар, Айжулдыз, Жансая, Мама и Папа объединились с минионами. Теперь им предстоит выдержать последнюю битву, освободить Кристалл Радости и вернуть свет каждой земле.</p></details>
     <Battlefield game={game} />
-    {!(mode === 'online' && onlineRole === 'guest') && <BattleItems coins={game.coins} disabled={finished} onUse={(kind) => { useItem(kind); if (mode === 'online') sendAction({ type: 'item', kind }); }} />}
+    <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
       {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} onSummon={(index) => summon(index, 'player')} />}
       {mode === 'online' && <MinionShop title={onlineRole === 'host' ? 'Синий игрок — вы' : 'Красный игрок — вы'} enemy={onlineRole === 'guest'} coins={onlineRole === 'host' ? game.coins : game.enemyCoins} disabled={finished || !opponentOnline} askarUnlocked={onlineRole === 'host' && askarUnlocked} onSummon={onlineSummon} />}

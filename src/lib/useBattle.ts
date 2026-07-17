@@ -189,16 +189,17 @@ export function useBattle(mode: GameMode, paused = false) {
     if (!kind || current.winner || balance < kind.cost) return current;
     return { ...current, coins: side === 'player' ? current.coins - kind.cost : current.coins, enemyCoins: side === 'enemy' ? current.enemyCoins - kind.cost : current.enemyCoins, nextId: current.nextId + 1, units: [...current.units, createUnit(kind, side, current.nextId)] };
   }), []);
-  const useItem = useCallback((kind: ItemKind) => setGame((current) => {
+  const useItem = useCallback((kind: ItemKind, side: Side = 'player') => setGame((current) => {
     if (current.winner) return current;
     const costs: Record<ItemKind, number> = { log: 18, potion: 22, meteor: 55 };
-    if (current.coins < costs[kind]) return current;
-    const game = { ...current, coins: current.coins - costs[kind], units: current.units.map((unit) => ({ ...unit })), effects: [...current.effects] };
-    const enemies = game.units.filter((unit) => unit.side === 'enemy');
+    const balance = side === 'player' ? current.coins : current.enemyCoins;
+    if (balance < costs[kind]) return current;
+    const game = { ...current, coins: side === 'player' ? current.coins - costs[kind] : current.coins, enemyCoins: side === 'enemy' ? current.enemyCoins - costs[kind] : current.enemyCoins, units: current.units.map((unit) => ({ ...unit })), effects: [...current.effects] };
+    const enemies = game.units.filter((unit) => unit.side !== side);
     if (kind === 'log') enemies.filter((unit) => !unit.spectral).forEach((unit) => takeDamage(unit, 3));
-    if (kind === 'potion') game.units.filter((unit) => unit.side === 'player').forEach((unit) => { unit.health = Math.min(unit.hp, unit.health + 6); });
-    if (kind === 'meteor') { enemies.filter((unit) => !unit.spectral).forEach((unit) => takeDamage(unit, 8)); game.enemyBase -= 5; }
-    game.effects.push({ id: game.nextId++, kind, side: 'player', x: kind === 'potion' ? 35 : kind === 'meteor' ? 72 : 50, life: kind === 'log' ? 1.8 : kind === 'meteor' ? 1.2 : .9 });
+    if (kind === 'potion') game.units.filter((unit) => unit.side === side).forEach((unit) => { unit.health = Math.min(unit.hp, unit.health + 6); });
+    if (kind === 'meteor') { enemies.filter((unit) => !unit.spectral).forEach((unit) => takeDamage(unit, 8)); if (side === 'player') game.enemyBase -= 5; else game.playerBase -= 5; }
+    game.effects.push({ id: game.nextId++, kind, side, x: kind === 'potion' ? side === 'player' ? 35 : 65 : kind === 'meteor' ? side === 'player' ? 72 : 28 : 50, life: kind === 'log' ? 1.8 : kind === 'meteor' ? 1.2 : .9 });
     return game;
   }), []);
   return { game, summon, useItem, restart: () => setGame(initialGame()), replaceGame: setGame };

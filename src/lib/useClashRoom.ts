@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 import type { GameState, ItemKind, Side } from './game';
 
 export type ClashRole = 'host' | 'guest';
-export type ClashAction = { type: 'summon'; index: number; side: Side } | { type: 'item'; kind: ItemKind } | { type: 'restart' };
+export type ClashAction = { type: 'summon'; index: number; side: Side } | { type: 'item'; kind: ItemKind; side: Side } | { type: 'restart' };
 
 export function useClashRoom(roomCode: string, role: ClashRole, onAction: (action: ClashAction) => void, onState: (game: GameState) => void) {
   const [connected, setConnected] = useState(false);
