@@ -1,6 +1,6 @@
 export type Side = 'player' | 'enemy';
 export type Winner = Side | null;
-export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness';
+export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness' | 'swordwave';
 export type CharacterGender = 'girl' | 'boy';
 
 export type MinionKind = {
@@ -65,7 +65,7 @@ export const MINIONS: MinionKind[] = [
   { name: 'Жансая', icon: '🌟', cost: 55, hp: 20, damage: 4, speed: 3.4, color: '#df7a43', gender: 'girl', projectile: 'joy' },
   { name: 'Мама', icon: '💗', cost: 75, hp: 22, damage: 0, speed: 2.4, color: '#d96583', gender: 'girl', healer: true },
   { name: 'Папа', icon: '💪', cost: 85, hp: 50, damage: 9, speed: 1.8, color: '#315e83', gender: 'boy' },
-  { name: 'Аскар с мечом', icon: '⚔️', cost: 100, hp: 36, damage: 11, speed: 3.2, color: '#286dcc', gender: 'boy' },
+  { name: 'Аскар с мечом', icon: '⚔️', cost: 100, hp: 36, damage: 11, speed: 3.2, color: '#286dcc', gender: 'boy', projectile: 'swordwave' },
 ];
 
 export const initialGame = (): GameState => ({

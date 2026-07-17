@@ -403,3 +403,16 @@ button { font: inherit; }
   font-weight: 800;
   cursor: pointer;
 }
+.projectile--swordwave {
+  width: 38px;
+  height: 24px;
+  border: 4px solid #bff4ff;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px #42a5ff);
+  animation: swordWavePulse .25s ease-in-out infinite alternate;
+}
+.projectile--enemy.projectile--swordwave { transform: translateX(-50%) rotate(225deg); filter: drop-shadow(0 0 6px #ff5555) drop-shadow(0 0 12px #ff2222); }
+@keyframes swordWavePulse { from { scale: .85; opacity: .75; } to { scale: 1.18; opacity: 1; } }

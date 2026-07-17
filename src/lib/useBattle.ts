@@ -22,7 +22,7 @@ function shoot(game: GameState, unit: Unit) {
 function moveProjectiles(game: GameState, dt: number) {
   const active: Projectile[] = [];
   for (const shot of game.projectiles) {
-    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'arrow' ? 18 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
+    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'arrow' ? 18 : shot.kind === 'swordwave' ? 16 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
     const target = game.units.find((unit) => unit.side !== shot.side && (!unit.spectral || shot.hitsSpectral) && Math.abs(unit.x - shot.x) < 2);
     if (target) {
       if (shot.kind === 'kindness' && target.name !== 'Жансая') { target.side = shot.side; target.health = Math.max(target.health, Math.ceil(target.hp * .65)); target.x = shot.x + (shot.side === 'player' ? 2 : -2); continue; }
