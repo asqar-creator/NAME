@@ -28,7 +28,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
 
   return <main className="game-shell">
-    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
+    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
     <header className="game-header">
       <div><span className="eyebrow">АВТОБИТВА</span><h1>Битва баз</h1><p>Создавай армию, прорвись через линию и уничтожь красную крепость.</p></div>
       <div className="mode-switch">

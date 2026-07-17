@@ -368,3 +368,13 @@ button { font: inherit; }
   text-align: center;
   text-transform: uppercase;
 }
+.game-toolbar .clash-online-button {
+  background: #176b45 !important;
+  border-color: #8ff0bd !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 720px) {
+  .game-toolbar { flex-wrap: wrap; gap: 8px; }
+  .game-toolbar .clash-online-button { order: 3; width: 100%; }
+}
