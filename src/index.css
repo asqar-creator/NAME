@@ -455,3 +455,16 @@ button { font: inherit; }
 .fighter3d--enemy .fighter3d__real-sword { transform: rotate(32deg) scaleX(-1); right: auto; left: -17px; }
 .fighter3d--sword-askar .fighter3d__model { animation: swordHeroRun .42s ease-in-out infinite alternate; }
 @keyframes swordHeroRun { from { translate:0 0; } to { translate:0 -2px; } }
+.projectile--superswordwave {
+  width: 72px;
+  height: 48px;
+  border: 7px solid #fffbd1;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  filter: drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px #2f9cff) drop-shadow(0 0 30px #ffe158);
+  animation: superSwordWave .18s ease-in-out infinite alternate;
+}
+.projectile--enemy.projectile--superswordwave { transform:translateX(-50%) rotate(225deg); filter:drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px #ff3030) drop-shadow(0 0 30px #ffb52e); }
+@keyframes superSwordWave { from { scale:.82; opacity:.8; } to { scale:1.2; opacity:1; } }

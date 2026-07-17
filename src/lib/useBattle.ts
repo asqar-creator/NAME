@@ -22,7 +22,13 @@ function shoot(game: GameState, unit: Unit) {
 function moveProjectiles(game: GameState, dt: number) {
   const active: Projectile[] = [];
   for (const shot of game.projectiles) {
-    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'arrow' ? 18 : shot.kind === 'swordwave' ? 16 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
+    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'superswordwave' ? 20 : shot.kind === 'arrow' ? 18 : shot.kind === 'swordwave' ? 16 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
+    if (shot.kind === 'superswordwave') {
+      shot.hitIds ??= [];
+      game.units.filter((unit) => unit.side !== shot.side && !shot.hitIds!.includes(unit.id) && Math.abs(unit.x - shot.x) < 4).forEach((unit) => { unit.health = 0; shot.hitIds!.push(unit.id); });
+      if (shot.x > 3 && shot.x < 97) active.push(shot);
+      continue;
+    }
     const target = game.units.find((unit) => unit.side !== shot.side && (!unit.spectral || shot.hitsSpectral) && Math.abs(unit.x - shot.x) < 2);
     if (target) {
       if (shot.kind === 'kindness' && target.name !== 'Жансая') { target.side = shot.side; target.health = Math.max(target.health, Math.ceil(target.hp * .65)); target.x = shot.x + (shot.side === 'player' ? 2 : -2); continue; }
@@ -167,6 +173,10 @@ function simulate(previous: GameState, dt: number, mode: GameMode): GameState {
   game.units.filter((unit) => unit.name === 'Жансая' && unit.health <= 0 && !unit.enraged && !unit.calmed).forEach((unit) => { unit.enraged = true; unit.health = Math.ceil(unit.hp * .7); unit.speed *= 2.2; unit.damage *= 2; unit.projectile = undefined; unit.icon = '😡'; unit.color = '#d94432'; unit.attackTimer = 0; });
   game.units.filter((unit) => unit.name === 'Айжулдыз' && unit.health <= 0 && !unit.crying && !unit.cryingDefeated).forEach((unit) => { unit.crying = true; unit.health = Math.max(8, Math.ceil(unit.hp * .3)); unit.summonTimer = 0; });
   const defeated = game.units.filter((unit) => unit.health <= 0 && (unit.name !== 'Айжулдыз' || unit.cryingDefeated));
+  defeated.filter((unit) => unit.name === 'Аскар с мечом').forEach((unit) => {
+    game.projectiles.push({ id: game.nextId++, side: unit.side, x: unit.x, damage: 0, kind: 'superswordwave', hitsSpectral: true, hitIds: [] });
+    game.effects.push({ id: game.nextId++, kind: 'meteor', side: unit.side, x: unit.x, life: .65 });
+  });
   game.coins += defeated.filter((unit) => unit.side === 'enemy' && unit.name !== 'Тень').length * 3;
   game.enemyCoins += defeated.filter((unit) => unit.side === 'player' && unit.name !== 'Тень').length * 3;
   game.fallenUnits.push(...defeated.map((unit) => ({ id: unit.id, side: unit.side, x: unit.x, color: unit.color, icon: unit.icon, life: .8 })));

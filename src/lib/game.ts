@@ -1,6 +1,6 @@
 export type Side = 'player' | 'enemy';
 export type Winner = Side | null;
-export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness' | 'swordwave';
+export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness' | 'swordwave' | 'superswordwave';
 export type CharacterGender = 'girl' | 'boy';
 
 export type MinionKind = {
@@ -22,7 +22,7 @@ export type Unit = MinionKind & {
 };
 
 export type Projectile = {
-  id: number; side: Side; x: number; damage: number; kind: ProjectileKind; hitsSpectral?: boolean;
+  id: number; side: Side; x: number; damage: number; kind: ProjectileKind; hitsSpectral?: boolean; hitIds?: number[];
 };
 
 export type FallenUnit = {
