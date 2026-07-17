@@ -120,6 +120,7 @@ export function AdventurePage({ onHome }: { onHome: () => void }) {
   const buyWeapon = (item: typeof weapons[number]) => { if (ownedWeapons.includes(item.id)) return setWeapon(item.id); if (crystalBank >= item.cost) { setCrystalBank((v) => v - item.cost); setOwnedWeapons((v) => [...v, item.id]); setWeapon(item.id); } };
   return <main className="adventure-page">
     <header className="adventure-header"><button onClick={() => setStarted(false)}>☰ Меню</button><div><b>Уровень {level}</b><strong>❤️ {lives}/5&nbsp;&nbsp; 🪙 {gold}&nbsp;&nbsp; ⏳ {timeLeft} с&nbsp;&nbsp; 💎 {collected.length}/{activeGems.length}</strong><span>Остров сокровищ</span></div></header>
+    <details className="game-story game-story--dark"><summary>📖 История острова</summary><p>После сильного шторма твой корабль разбился у забытого острова. Пираты расхитили древнее сокровище и спрятали его силу в кристаллах. Собери их, победи капитанов и Демогоргона, чтобы открыть храм и вернуться домой.</p></details>
     <section className="adventure-world">
       <div className="adventure-camera" style={{ transform: `translate(${(50 - player.x) * .58}%, ${(50 - player.y) * .58}%) scale(1.7)` }}>
       <div className="adventure-sea" /><div className="adventure-island" />

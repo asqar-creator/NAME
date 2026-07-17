@@ -4,10 +4,9 @@ import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
 import { GamePage } from './pages/GamePage';
 import { HomePage } from './pages/HomePage';
-import { ForestPage } from './pages/ForestPage';
-import { PlatformerPage } from './pages/PlatformerPage';
 import { AdventurePage } from './pages/AdventurePage';
 import { ElementalMergePage } from './pages/ElementalMergePage';
+import { MysteryTowerPage } from './pages/MysteryTowerPage';
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname);
@@ -44,11 +43,10 @@ export default function App() {
 
   const accountButton = <button className="account-logout" onClick={logout}>Выйти</button>;
 
-  let page = <HomePage onPlay={() => navigate('/game')} onForest={() => navigate('/forest')} onPlatformer={() => navigate('/platformer')} onAdventure={() => navigate('/adventure')} onMerge={() => navigate('/elemental-merge')} />;
+  let page = <HomePage onPlay={() => navigate('/game')} onAdventure={() => navigate('/adventure')} onMerge={() => navigate('/elemental-merge')} onTower={() => navigate('/mystery-tower')} />;
   if (path === '/game') page = <GamePage onHome={() => navigate('/')} />;
-  if (path === '/forest') page = <ForestPage onHome={() => navigate('/')} />;
-  if (path === '/platformer') page = <PlatformerPage onHome={() => navigate('/')} />;
   if (path === '/adventure') page = <AdventurePage onHome={() => navigate('/')} />;
   if (path === '/elemental-merge') page = <ElementalMergePage onHome={() => navigate('/')} />;
+  if (path === '/mystery-tower') page = <MysteryTowerPage onHome={() => navigate('/')} />;
   return <>{accountButton}{page}</>;
 }

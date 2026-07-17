@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 
-const ENV_FILE = '.env.local';
+const ENV_FILES = ['.env.local', '.env'];
 const WORKFLOW = 'keep-awake.yml';
 
 function fail(message) {
@@ -57,11 +57,15 @@ async function findNewRun(repo, previousRunIds) {
 }
 
 let envSource;
-try {
-  envSource = await readFile(ENV_FILE, 'utf8');
-} catch {
-  fail(`${ENV_FILE} is missing`);
+for (const envFile of ENV_FILES) {
+  try {
+    envSource = await readFile(envFile, 'utf8');
+    break;
+  } catch {
+    // Try the next supported local environment file.
+  }
 }
+if (!envSource) fail(`${ENV_FILES.join(' or ')} is missing`);
 
 const env = parseEnv(envSource);
 const supabaseUrl = env.VITE_SUPABASE_URL?.replace(/\/$/, '');
