@@ -468,3 +468,14 @@ button { font: inherit; }
 }
 .projectile--enemy.projectile--superswordwave { transform:translateX(-50%) rotate(225deg); filter:drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px #ff3030) drop-shadow(0 0 30px #ffb52e); }
 @keyframes superSwordWave { from { scale:.82; opacity:.8; } to { scale:1.2; opacity:1; } }
+.projectile--slap {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  filter: drop-shadow(0 0 7px #ffd494);
+  animation: flyingSlap .25s ease-in-out infinite alternate;
+}
+.projectile--slap::after { content:'🖐️'; position:absolute; left:0; top:-5px; font-size:27px; }
+.projectile--enemy.projectile--slap { transform:translateX(-50%) scaleX(-1); }
+@keyframes flyingSlap { from { rotate:-18deg; scale:.9; } to { rotate:18deg; scale:1.18; } }

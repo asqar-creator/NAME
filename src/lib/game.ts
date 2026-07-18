@@ -1,6 +1,6 @@
 export type Side = 'player' | 'enemy';
 export type Winner = Side | null;
-export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness' | 'swordwave' | 'superswordwave';
+export type ProjectileKind = 'arrow' | 'fireball' | 'iceball' | 'bomb' | 'shadoworb' | 'joy' | 'kindness' | 'slap' | 'swordwave' | 'superswordwave';
 export type CharacterGender = 'girl' | 'boy';
 
 export type MinionKind = {

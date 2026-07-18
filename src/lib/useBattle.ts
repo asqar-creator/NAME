@@ -22,7 +22,7 @@ function shoot(game: GameState, unit: Unit) {
 function moveProjectiles(game: GameState, dt: number) {
   const active: Projectile[] = [];
   for (const shot of game.projectiles) {
-    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'superswordwave' ? 20 : shot.kind === 'arrow' ? 18 : shot.kind === 'swordwave' ? 16 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
+    shot.x += (shot.side === 'player' ? 1 : -1) * (shot.kind === 'superswordwave' ? 20 : shot.kind === 'arrow' ? 18 : shot.kind === 'swordwave' ? 16 : shot.kind === 'slap' ? 17 : shot.kind === 'kindness' ? 15 : shot.kind === 'iceball' ? 10 : shot.kind === 'bomb' ? 9 : 12) * dt;
     if (shot.kind === 'superswordwave') {
       shot.hitIds ??= [];
       game.units.filter((unit) => unit.side !== shot.side && !shot.hitIds!.includes(unit.id) && Math.abs(unit.x - shot.x) < 4).forEach((unit) => { unit.health = 0; shot.hitIds!.push(unit.id); });
@@ -68,6 +68,10 @@ function fight(game: GameState, unit: Unit, dt: number) {
       const healing = unit.name === 'Мама' ? 10 : 3; const interval = unit.name === 'Мама' ? .7 : 1;
       if (unit.attackTimer >= interval) { wounded.health = Math.min(wounded.hp, wounded.health + healing); unit.attackTimer = 0; }
       return;
+    }
+    if (unit.name === 'Мама' && unit.attackTimer >= 1.2) {
+      const foe = game.units.filter((enemy) => enemy.side !== unit.side && enemy.health > 0 && Math.abs(enemy.x - unit.x) < 18).sort((a, b) => Math.abs(a.x - unit.x) - Math.abs(b.x - unit.x))[0];
+      if (foe) { game.projectiles.push({ id: game.nextId++, side: unit.side, x: unit.x, damage: 6, kind: 'slap' }); unit.attackTimer = 0; return; }
     }
     const escorts = game.units.filter((ally) => ally.side === unit.side && ally.id !== unit.id && !ally.healer && ally.name !== 'Тень' && ally.health > 0);
     if (!escorts.length) {
