@@ -44,7 +44,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     <Battlefield game={game} />
     <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
-      {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} onSummon={(index) => summon(index, 'player')} />}
+      {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} unlockedCount={mode === 'bot' ? level + 2 : undefined} onSummon={(index) => summon(index, 'player')} />}
       {mode === 'online' && <MinionShop title={onlineRole === 'host' ? 'Синий игрок — вы' : 'Красный игрок — вы'} enemy={onlineRole === 'guest'} coins={onlineRole === 'host' ? game.coins : game.enemyCoins} disabled={finished || !opponentOnline} askarUnlocked={onlineRole === 'host' && askarUnlocked} onSummon={onlineSummon} />}
       {mode === 'local' && <MinionShop title="Красный игрок" enemy coins={game.enemyCoins} disabled={finished} askarUnlocked={false} onSummon={(index) => summon(index, 'enemy')} />}
     </div>

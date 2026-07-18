@@ -479,3 +479,4 @@ button { font: inherit; }
 .projectile--slap::after { content:'🖐️'; position:absolute; left:0; top:-5px; font-size:27px; }
 .projectile--enemy.projectile--slap { transform:translateX(-50%) scaleX(-1); }
 @keyframes flyingSlap { from { rotate:-18deg; scale:.9; } to { rotate:18deg; scale:1.18; } }
+.shop__unlock-hint { margin: 4px 0 10px; color: #f1c96a; font-size: 12px; font-weight: 800; }
