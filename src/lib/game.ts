@@ -61,7 +61,7 @@ export const MINIONS: MinionKind[] = [
   { name: 'Копейщица', icon: '➶', cost: 15, hp: 8, damage: 3, speed: 3.7, color: '#4e9a72', gender: 'girl', projectile: 'arrow' },
   { name: 'Каменный голем', icon: '🗿', cost: 42, hp: 38, damage: 5, speed: 1, color: '#777d82', gender: 'boy' },
   { name: 'Призрак', icon: '👻', cost: 36, hp: 16, damage: 4, speed: 3.2, color: '#b9e8ef', gender: 'boy', spectral: true },
-  { name: 'Айжулдыз', icon: '💖', cost: 60, hp: 24, damage: 5, speed: 3, color: '#a84fd0', gender: 'girl', projectile: 'joy' },
+  { name: 'Айжулдыз', icon: '💖', cost: 60, hp: 38, damage: 5, speed: 3, color: '#a84fd0', gender: 'girl', projectile: 'joy' },
   { name: 'Жансая', icon: '🌟', cost: 55, hp: 20, damage: 4, speed: 3.4, color: '#df7a43', gender: 'girl', projectile: 'joy' },
   { name: 'Мама', icon: '💗', cost: 75, hp: 22, damage: 0, speed: 2.4, color: '#d96583', gender: 'girl', healer: true },
   { name: 'Папа', icon: '💪', cost: 85, hp: 50, damage: 9, speed: 3.8, color: '#315e83', gender: 'boy' },

@@ -141,7 +141,7 @@ function simulate(previous: GameState, dt: number, mode: GameMode, level: number
       const allEnemies = game.units.filter((foe) => foe.side !== unit.side && foe.health > 0);
       const enemyNearby = nearbyEnemies.length > 0;
       unit.attackTimer += dt;
-      if (allEnemies.length && unit.attackTimer >= 1) { const tearsDamage = boostedByZhansaya(game, unit) ? 3 : 2; allEnemies.forEach((foe) => takeDamage(foe, tearsDamage)); unit.attackTimer = 0; }
+      if (allEnemies.length && unit.attackTimer >= 1) { const tearsDamage = boostedByZhansaya(game, unit) ? 8 : 5; allEnemies.forEach((foe) => takeDamage(foe, tearsDamage)); unit.attackTimer = 0; }
       if (!enemyNearby && unit.summonTimer >= 2.5) { unit.crying = false; unit.health = Math.ceil(unit.hp * .55); unit.summonTimer = 0; }
       return;
     }
@@ -176,7 +176,7 @@ function simulate(previous: GameState, dt: number, mode: GameMode, level: number
     game.baseTimer = 0;
   }
   game.units.filter((unit) => unit.name === 'Жансая' && unit.health <= 0 && !unit.enraged && !unit.calmed).forEach((unit) => { unit.enraged = true; unit.health = Math.ceil(unit.hp * .7); unit.speed *= 2.2; unit.damage *= 2; unit.projectile = undefined; unit.icon = '😡'; unit.color = '#d94432'; unit.attackTimer = 0; });
-  game.units.filter((unit) => unit.name === 'Айжулдыз' && unit.health <= 0 && !unit.crying && !unit.cryingDefeated).forEach((unit) => { unit.crying = true; unit.health = Math.max(8, Math.ceil(unit.hp * .3)); unit.summonTimer = 0; });
+  game.units.filter((unit) => unit.name === 'Айжулдыз' && unit.health <= 0 && !unit.crying && !unit.cryingDefeated).forEach((unit) => { unit.crying = true; unit.health = Math.max(12, Math.ceil(unit.hp * .45)); unit.summonTimer = 0; });
   const defeated = game.units.filter((unit) => unit.health <= 0 && (unit.name !== 'Айжулдыз' || unit.cryingDefeated));
   defeated.filter((unit) => unit.name === 'Аскар с мечом').forEach((unit) => {
     game.projectiles.push({ id: game.nextId++, side: unit.side, x: unit.x, damage: 0, kind: 'superswordwave', hitsSpectral: true, hitIds: [] });
