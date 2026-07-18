@@ -138,9 +138,10 @@ function simulate(previous: GameState, dt: number, mode: GameMode, level: number
     if (unit.name === 'Айжулдыз' && unit.crying) {
       if (unit.health <= 0) { unit.crying = false; unit.cryingDefeated = true; return; }
       const nearbyEnemies = game.units.filter((foe) => foe.side !== unit.side && foe.health > 0 && Math.abs(foe.x - unit.x) < 14);
+      const allEnemies = game.units.filter((foe) => foe.side !== unit.side && foe.health > 0);
       const enemyNearby = nearbyEnemies.length > 0;
       unit.attackTimer += dt;
-      if (enemyNearby && unit.attackTimer >= 1) { const tearsDamage = boostedByZhansaya(game, unit) ? 3 : 2; nearbyEnemies.forEach((foe) => takeDamage(foe, tearsDamage)); unit.attackTimer = 0; }
+      if (allEnemies.length && unit.attackTimer >= 1) { const tearsDamage = boostedByZhansaya(game, unit) ? 3 : 2; allEnemies.forEach((foe) => takeDamage(foe, tearsDamage)); unit.attackTimer = 0; }
       if (!enemyNearby && unit.summonTimer >= 2.5) { unit.crying = false; unit.health = Math.ceil(unit.hp * .55); unit.summonTimer = 0; }
       return;
     }
