@@ -505,3 +505,4 @@ button { font: inherit; }
 .crystal-minion span { display:grid; gap:2px; }.crystal-minion small { color:#a9c7d7; font-size:11px; }
 .game-toolbar .crystal-shop-button { background:#6d3bb8 !important; border-color:#d9b8ff !important; font-weight:900 !important; box-shadow:0 0 16px #a866ff66 !important; }
 @media (max-width:720px) { .game-toolbar .crystal-shop-button { order:2; flex:1; }.game-toolbar .clash-crystals { order:1; }.game-toolbar .clash-online-button { order:4; } }
+.player-name-button { display:block; margin:10px auto; padding:10px 20px; border:2px solid #ffe18c; border-radius:999px; background:#5f4214; color:#fff; font-weight:900; cursor:pointer; box-shadow:0 0 13px #ffc84c55; }

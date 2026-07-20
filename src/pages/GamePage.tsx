@@ -18,6 +18,9 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [level, setLevel] = useState(() => Number(localStorage.getItem('clash-bot-level')) || 1);
   const [crystals, setCrystals] = useState(() => Number(localStorage.getItem('clash-crystals')) || 0);
   const [crystalShopOpen, setCrystalShopOpen] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
+  const [playerName, setPlayerName] = useState(() => localStorage.getItem('clash-player-name') || 'Звезда');
+  const [nameDraft, setNameDraft] = useState(() => localStorage.getItem('clash-player-name') || 'Звезда');
   const [ownedMinions, setOwnedMinions] = useState<string[]>(() => { const saved = localStorage.getItem('clash-owned-minions'); return saved ? JSON.parse(saved) as string[] : MINIONS.slice(0, 3).map((kind) => kind.name); });
   const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').every((kind) => ownedMinions.includes(kind.name)));
@@ -36,6 +39,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
   const crystalPrice = (name: string, coinCost: number) => ({ Айжулдыз: 250, Жансая: 300, Мама: 400, Папа: 500 }[name] ?? Math.max(40, Math.ceil(coinCost / 10) * 10));
   const buyMinionForever = (name: string, price: number) => { if (crystals < price || ownedMinions.includes(name)) return; const next = [...ownedMinions, name]; setOwnedMinions(next); setCrystals((value) => { const balance = value - price; localStorage.setItem('clash-crystals', String(balance)); return balance; }); localStorage.setItem('clash-owned-minions', JSON.stringify(next)); };
+  const savePlayerName = () => { const next = nameDraft.trim().slice(0, 18) || 'Игрок'; setPlayerName(next); setNameDraft(next); localStorage.setItem('clash-player-name', next); setNameOpen(false); };
 
   return <main className="game-shell">
     <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><strong className="clash-crystals">💎 {crystals}</strong><button className="crystal-shop-button" onClick={() => setCrystalShopOpen(true)}>🛒 МАГАЗИН</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
@@ -48,11 +52,12 @@ export function GamePage({ onHome }: { onHome: () => void }) {
       </div>
     </header>
     <details className="game-story"><summary>📖 Новая история «Клеш оф Минионс»</summary><p>В ночь Великого Затмения Злой Аскар оживил Красную крепость и отправил тёмных двойников семьи захватить все королевства. Герой Аскар, Айжулдыз, Жансая, Мама и Папа объединились с минионами. Теперь им предстоит выдержать последнюю битву, освободить Кристалл Радости и вернуть свет каждой земле.</p></details>
+    <button className="player-name-button" onClick={() => setNameOpen(true)}>⭐ {playerName}</button>
     {askarUnlockNotice && <div className="step-success" role="status">⚔️ Аскар с мечом разблокирован! Ты собрал всех минионов и всю семью.</div>}
     <Battlefield game={game} />
     <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
-      {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} ownedNames={ownedMinions} onSummon={(index) => summon(index, 'player')} />}
+      {mode !== 'online' && <MinionShop title={playerName} coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} ownedNames={ownedMinions} onSummon={(index) => summon(index, 'player')} />}
       {mode === 'online' && <MinionShop title={onlineRole === 'host' ? 'Синий игрок — вы' : 'Красный игрок — вы'} enemy={onlineRole === 'guest'} coins={onlineRole === 'host' ? game.coins : game.enemyCoins} disabled={finished || !opponentOnline} askarUnlocked={onlineRole === 'host' && askarUnlocked} ownedNames={ownedMinions} onSummon={onlineSummon} />}
       {mode === 'local' && <MinionShop title="Красный игрок" enemy coins={game.enemyCoins} disabled={finished} askarUnlocked={false} ownedNames={MINIONS.slice(0, 3).map((kind) => kind.name)} onSummon={(index) => summon(index, 'enemy')} />}
     </div>
@@ -65,5 +70,6 @@ export function GamePage({ onHome }: { onHome: () => void }) {
       <button onClick={restart}>Новая битва</button>
     </div></div>}
     {crystalShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setCrystalShopOpen(false)}>×</button><h2>💎 Магазин кристаллов</h2><p>Твои кристаллы: <b>💎 {crystals}</b>. Семейные герои — самые редкие и дорогие.</p>{MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').map((kind) => { const owned = ownedMinions.includes(kind.name); const price = crystalPrice(kind.name, kind.cost); return <div className="crystal-minion" key={kind.name}><span>{kind.icon} {kind.name}<small>❤ {kind.hp} · ⚔ {kind.damage}</small></span><button disabled={owned || crystals < price} onClick={() => buyMinionForever(kind.name, price)}>{owned ? 'Куплен' : `💎 ${price}`}</button></div>; })}</section></div>}
+    {nameOpen && <div className="tower-window"><section><button className="close" onClick={() => setNameOpen(false)}>×</button><h2>⭐ Имя игрока</h2><p>Придумай имя, например «Звезда» или «Барсик». Бот останется Ботом.</p><input value={nameDraft} maxLength={18} onChange={(event) => setNameDraft(event.target.value)} placeholder="Твоё имя" /><button onClick={savePlayerName}>Сохранить имя</button></section></div>}
   </main>;
 }

@@ -4,6 +4,7 @@ const canBuy = (kind: MinionKind | undefined, coins: number): kind is MinionKind
 
 export function useBotSpell(game: GameState) {
   const attackers = game.units.filter((unit) => unit.side === 'player' && unit.name !== 'Тень');
+  const allies = game.units.filter((unit) => unit.side === 'enemy' && unit.health > 0);
   const dangerous = attackers.filter((unit) => unit.x >= 58);
   if (dangerous.length >= 5 && game.enemyCoins >= 55) {
     dangerous.forEach((unit) => { unit.health -= 8; });
@@ -16,6 +17,13 @@ export function useBotSpell(game: GameState) {
     dangerous.forEach((unit) => { unit.health -= 3; });
     game.enemyCoins -= 18;
     game.effects.push({ id: game.nextId++, kind: 'log', side: 'enemy', x: 50, life: 1.8 });
+    return true;
+  }
+  const wounded = allies.filter((unit) => unit.health < unit.hp * .55);
+  if (wounded.length >= 2 && game.enemyCoins >= 22) {
+    allies.forEach((unit) => { unit.health = Math.min(unit.hp, unit.health + 6); });
+    game.enemyCoins -= 22;
+    game.effects.push({ id: game.nextId++, kind: 'potion', side: 'enemy', x: 65, life: .9 });
     return true;
   }
   return false;
