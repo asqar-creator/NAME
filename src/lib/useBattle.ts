@@ -128,8 +128,7 @@ function simulate(previous: GameState, dt: number, mode: GameMode, level: number
   if (game.coinTimer >= 1) { game.coins += 2; game.enemyCoins += 2; game.coinTimer -= 1; }
   if (mode === 'bot' && game.enemyTimer >= Math.max(.45, 1.25 - (level - 1) * .07)) {
     const usedSpell = useBotSpell(game);
-    const botUnlockCount = level < 12 ? Math.min(level + 2, 11) : level + 2;
-    const kind = usedSpell ? null : chooseBotMinion(game, botUnlockCount);
+    const kind = usedSpell ? null : chooseBotMinion(game, 3);
     if (kind) { const enemy = createUnit(kind, 'enemy', game.nextId++); const power = 1 + Math.min(2, (level - 1) * .12); enemy.hp = Math.ceil(enemy.hp * power); enemy.health = enemy.hp; enemy.damage = Math.ceil(enemy.damage * power); enemy.speed *= 1 + Math.min(.65, (level - 1) * .04); game.units.push(enemy); game.enemyCoins -= kind.cost; }
     game.enemyTimer = 0;
   }
