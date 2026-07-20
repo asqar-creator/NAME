@@ -33,7 +33,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const joinOnlineRoom = () => { const code = roomInput.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(); if (!code) return; setOnlineRole('guest'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
-  const crystalPrice = (name: string, coinCost: number) => ({ Айжулдыз: 70, Жансая: 80, Мама: 90, Папа: 100 }[name] ?? Math.max(20, Math.ceil(coinCost / 10) * 5));
+  const crystalPrice = (name: string, coinCost: number) => ({ Айжулдыз: 250, Жансая: 300, Мама: 400, Папа: 500 }[name] ?? Math.max(40, Math.ceil(coinCost / 10) * 10));
   const buyMinionForever = (name: string, price: number) => { if (crystals < price || ownedMinions.includes(name)) return; const next = [...ownedMinions, name]; setOwnedMinions(next); setCrystals((value) => { const balance = value - price; localStorage.setItem('clash-crystals', String(balance)); return balance; }); localStorage.setItem('clash-owned-minions', JSON.stringify(next)); };
 
   return <main className="game-shell">
