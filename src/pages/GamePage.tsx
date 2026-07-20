@@ -15,6 +15,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [soundOn, setSoundOn] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [level, setLevel] = useState(() => Number(localStorage.getItem('clash-bot-level')) || 1);
+  const [crystals, setCrystals] = useState(() => Number(localStorage.getItem('clash-crystals')) || 0);
   const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => localStorage.getItem('clash-askar-sword-unlocked') === 'yes');
   const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1);
@@ -24,14 +25,14 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   useEffect(() => () => stopGameMusic(), []);
   useEffect(() => { if (!finished) { setShowResult(false); return; } const delay = game.winner === 'player' ? 4200 : 0; const timer = window.setTimeout(() => setShowResult(true), delay); return () => window.clearTimeout(timer); }, [finished, game.winner]);
   useEffect(() => { if (game.winner === 'player' && !askarUnlocked) { localStorage.setItem('clash-askar-sword-unlocked', 'yes'); setAskarUnlocked(true); } }, [game.winner, askarUnlocked]);
-  useEffect(() => { if (!game.winner) { levelAdvanced.current = false; return; } if (mode === 'bot' && game.winner === 'player' && !levelAdvanced.current) { levelAdvanced.current = true; const next = level + 1; localStorage.setItem('clash-bot-level', String(next)); setLevel(next); } }, [game.winner, mode, level]);
+  useEffect(() => { if (!game.winner) { levelAdvanced.current = false; return; } if (mode === 'bot' && game.winner === 'player' && !levelAdvanced.current) { levelAdvanced.current = true; const next = level + 1; localStorage.setItem('clash-bot-level', String(next)); setLevel(next); setCrystals((value) => { const reward = value + 5; localStorage.setItem('clash-crystals', String(reward)); return reward; }); } }, [game.winner, mode, level]);
   useEffect(() => { if (mode !== 'online' || onlineRole !== 'host' || !connected) return; const timer = window.setTimeout(() => sendState(game), 90); return () => window.clearTimeout(timer); }, [game, mode, onlineRole, connected, sendState]);
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const joinOnlineRoom = () => { const code = roomInput.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(); if (!code) return; setOnlineRole('guest'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
 
   return <main className="game-shell">
-    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
+    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><strong className="clash-crystals">💎 {crystals}</strong><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
     <header className="game-header">
       <div><span className="eyebrow">АВТОБИТВА · УРОВЕНЬ {level}</span><h1>Битва баз</h1><p>Создавай армию, прорвись через линию и уничтожь красную крепость. Каждый уровень сложнее предыдущего.</p></div>
       <div className="mode-switch">
@@ -53,7 +54,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     {showResult && <div className="result" role="dialog" aria-modal="true"><div className="result__card">
       <span>{game.winner === 'player' ? '🏆' : '💥'}</span>
       <h2>{game.winner === 'player' ? 'Синий игрок победил!' : mode === 'local' ? 'Красный игрок победил!' : 'База разрушена'}</h2>
-      <p>{game.winner === 'player' ? mode === 'bot' ? `🎉 Ура! Ты прошёл уровень ${Math.max(1, level - 1)}! Следующий уровень ${level} будет сложнее.` : '🎉 Ура! Вражеская крепость пала — ты победил!' : 'Попробуй снова: собери новую армию и защити свою базу.'}</p>
+      <p>{game.winner === 'player' ? mode === 'bot' ? `🎉 Ура! Ты прошёл уровень ${Math.max(1, level - 1)} и получил 💎 5 кристаллов! Следующий уровень ${level} будет сложнее.` : '🎉 Ура! Вражеская крепость пала — ты победил!' : 'Попробуй снова: собери новую армию и защити свою базу.'}</p>
       <button onClick={restart}>Новая битва</button>
     </div></div>}
   </main>;
