@@ -33,7 +33,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const joinOnlineRoom = () => { const code = roomInput.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(); if (!code) return; setOnlineRole('guest'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
-  const crystalPrice = (coinCost: number) => Math.max(5, Math.ceil(coinCost / 20) * 5);
+  const crystalPrice = (name: string, coinCost: number) => ({ Айжулдыз: 70, Жансая: 80, Мама: 90, Папа: 100 }[name] ?? Math.max(20, Math.ceil(coinCost / 10) * 5));
   const buyMinionForever = (name: string, price: number) => { if (crystals < price || ownedMinions.includes(name)) return; const next = [...ownedMinions, name]; setOwnedMinions(next); setCrystals((value) => { const balance = value - price; localStorage.setItem('clash-crystals', String(balance)); return balance; }); localStorage.setItem('clash-owned-minions', JSON.stringify(next)); };
 
   return <main className="game-shell">
@@ -62,6 +62,6 @@ export function GamePage({ onHome }: { onHome: () => void }) {
       <p>{game.winner === 'player' ? mode === 'bot' ? `🎉 Ура! Ты прошёл уровень ${Math.max(1, level - 1)} и получил 💎 5 кристаллов! Следующий уровень ${level} будет сложнее.` : '🎉 Ура! Вражеская крепость пала — ты победил!' : 'Попробуй снова: собери новую армию и защити свою базу.'}</p>
       <button onClick={restart}>Новая битва</button>
     </div></div>}
-    {crystalShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setCrystalShopOpen(false)}>×</button><h2>💎 Магазин кристаллов</h2><p>Твои кристаллы: <b>💎 {crystals}</b>. Чем сильнее персонаж, тем он дороже.</p>{MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').map((kind) => { const owned = ownedMinions.includes(kind.name); const price = crystalPrice(kind.cost); return <div className="crystal-minion" key={kind.name}><span>{kind.icon} {kind.name}<small>❤ {kind.hp} · ⚔ {kind.damage}</small></span><button disabled={owned || crystals < price} onClick={() => buyMinionForever(kind.name, price)}>{owned ? 'Куплен' : `💎 ${price}`}</button></div>; })}</section></div>}
+    {crystalShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setCrystalShopOpen(false)}>×</button><h2>💎 Магазин кристаллов</h2><p>Твои кристаллы: <b>💎 {crystals}</b>. Семейные герои — самые редкие и дорогие.</p>{MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').map((kind) => { const owned = ownedMinions.includes(kind.name); const price = crystalPrice(kind.name, kind.cost); return <div className="crystal-minion" key={kind.name}><span>{kind.icon} {kind.name}<small>❤ {kind.hp} · ⚔ {kind.damage}</small></span><button disabled={owned || crystals < price} onClick={() => buyMinionForever(kind.name, price)}>{owned ? 'Куплен' : `💎 ${price}`}</button></div>; })}</section></div>}
   </main>;
 }
