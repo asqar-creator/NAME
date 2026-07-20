@@ -20,14 +20,15 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [crystalShopOpen, setCrystalShopOpen] = useState(false);
   const [ownedMinions, setOwnedMinions] = useState<string[]>(() => { const saved = localStorage.getItem('clash-owned-minions'); return saved ? JSON.parse(saved) as string[] : MINIONS.slice(0, 3).map((kind) => kind.name); });
   const levelAdvanced = useRef(false);
-  const [askarUnlocked, setAskarUnlocked] = useState(() => localStorage.getItem('clash-askar-sword-unlocked') === 'yes');
+  const [askarUnlocked, setAskarUnlocked] = useState(() => MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').every((kind) => ownedMinions.includes(kind.name)));
+  const [askarUnlockNotice, setAskarUnlockNotice] = useState(false);
   const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1);
   const applyOnlineAction = (action: ClashAction) => { if (action.type === 'summon') summon(action.index, action.side); else if (action.type === 'item') useItem(action.kind, action.side); else restart(); };
   const { connected, opponentOnline, sendAction, sendState } = useClashRoom(roomCode, onlineRole, applyOnlineAction, replaceGame);
   const finished = game.winner !== null;
   useEffect(() => () => stopGameMusic(), []);
   useEffect(() => { if (!finished) { setShowResult(false); return; } const delay = game.winner === 'player' ? 4200 : 0; const timer = window.setTimeout(() => setShowResult(true), delay); return () => window.clearTimeout(timer); }, [finished, game.winner]);
-  useEffect(() => { if (game.winner === 'player' && !askarUnlocked) { localStorage.setItem('clash-askar-sword-unlocked', 'yes'); setAskarUnlocked(true); } }, [game.winner, askarUnlocked]);
+  useEffect(() => { const allCollected = MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').every((kind) => ownedMinions.includes(kind.name)); if (allCollected && !askarUnlocked) { localStorage.setItem('clash-askar-sword-unlocked', 'yes'); setAskarUnlocked(true); setAskarUnlockNotice(true); window.setTimeout(() => setAskarUnlockNotice(false), 4500); } }, [ownedMinions, askarUnlocked]);
   useEffect(() => { if (!game.winner) { levelAdvanced.current = false; return; } if (mode === 'bot' && game.winner === 'player' && !levelAdvanced.current) { levelAdvanced.current = true; const next = level + 1; localStorage.setItem('clash-bot-level', String(next)); setLevel(next); setCrystals((value) => { const reward = value + 5; localStorage.setItem('clash-crystals', String(reward)); return reward; }); } }, [game.winner, mode, level]);
   useEffect(() => { if (mode !== 'online' || onlineRole !== 'host' || !connected) return; const timer = window.setTimeout(() => sendState(game), 90); return () => window.clearTimeout(timer); }, [game, mode, onlineRole, connected, sendState]);
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
@@ -47,6 +48,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
       </div>
     </header>
     <details className="game-story"><summary>📖 Новая история «Клеш оф Минионс»</summary><p>В ночь Великого Затмения Злой Аскар оживил Красную крепость и отправил тёмных двойников семьи захватить все королевства. Герой Аскар, Айжулдыз, Жансая, Мама и Папа объединились с минионами. Теперь им предстоит выдержать последнюю битву, освободить Кристалл Радости и вернуть свет каждой земле.</p></details>
+    {askarUnlockNotice && <div className="step-success" role="status">⚔️ Аскар с мечом разблокирован! Ты собрал всех минионов и всю семью.</div>}
     <Battlefield game={game} />
     <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
