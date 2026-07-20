@@ -21,6 +21,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [nameOpen, setNameOpen] = useState(false);
   const [playerName, setPlayerName] = useState(() => localStorage.getItem('clash-player-name') || 'Звезда');
   const [nameDraft, setNameDraft] = useState(() => localStorage.getItem('clash-player-name') || 'Звезда');
+  const [rating, setRating] = useState(() => Number(localStorage.getItem('clash-rating')) || 0);
   const [ownedMinions, setOwnedMinions] = useState<string[]>(() => { const saved = localStorage.getItem('clash-owned-minions'); return saved ? JSON.parse(saved) as string[] : MINIONS.slice(0, 3).map((kind) => kind.name); });
   const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').every((kind) => ownedMinions.includes(kind.name)));
@@ -40,6 +41,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const crystalPrice = (name: string, coinCost: number) => ({ Дракон: 150, Айжулдыз: 250, Жансая: 300, Мама: 400, Папа: 500 }[name] ?? Math.max(40, Math.ceil(coinCost / 10) * 10));
   const buyMinionForever = (name: string, price: number) => { if (crystals < price || ownedMinions.includes(name)) return; const next = [...ownedMinions, name]; setOwnedMinions(next); setCrystals((value) => { const balance = value - price; localStorage.setItem('clash-crystals', String(balance)); return balance; }); localStorage.setItem('clash-owned-minions', JSON.stringify(next)); };
   const savePlayerName = () => { const next = nameDraft.trim().slice(0, 18) || 'Игрок'; setPlayerName(next); setNameDraft(next); localStorage.setItem('clash-player-name', next); setNameOpen(false); };
+  const rateGame = (value: number) => { setRating(value); localStorage.setItem('clash-rating', String(value)); };
 
   return <main className="game-shell">
     <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><strong className="clash-crystals">💎 {crystals}</strong><button className="crystal-shop-button" onClick={() => setCrystalShopOpen(true)}>🛒 МАГАЗИН</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
@@ -71,5 +73,6 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     </div></div>}
     {crystalShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setCrystalShopOpen(false)}>×</button><h2>💎 Магазин кристаллов</h2><p>Твои кристаллы: <b>💎 {crystals}</b>. Семейные герои — самые редкие и дорогие.</p>{MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').map((kind) => { const owned = ownedMinions.includes(kind.name); const price = crystalPrice(kind.name, kind.cost); return <div className="crystal-minion" key={kind.name}><span>{kind.icon} {kind.name}<small>❤ {kind.hp} · ⚔ {kind.damage}</small></span><button disabled={owned || crystals < price} onClick={() => buyMinionForever(kind.name, price)}>{owned ? 'Куплен' : `💎 ${price}`}</button></div>; })}</section></div>}
     {nameOpen && <div className="tower-window"><section><button className="close" onClick={() => setNameOpen(false)}>×</button><h2>⭐ Имя игрока</h2><p>Придумай имя, например «Звезда» или «Барсик». Бот останется Ботом.</p><input value={nameDraft} maxLength={18} onChange={(event) => setNameDraft(event.target.value)} placeholder="Твоё имя" /><button onClick={savePlayerName}>Сохранить имя</button></section></div>}
+    <section className="game-rating"><b>Оцени «Битву баз»:</b><div>{[1, 2, 3, 4, 5].map((value) => <button className={value <= rating ? 'selected' : ''} onClick={() => rateGame(value)} key={value} aria-label={`Оценка ${value}`}>★</button>)}</div>{rating > 0 && <span>Спасибо за оценку {rating}/5!</span>}</section>
   </main>;
 }

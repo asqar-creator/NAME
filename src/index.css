@@ -506,3 +506,5 @@ button { font: inherit; }
 .game-toolbar .crystal-shop-button { background:#6d3bb8 !important; border-color:#d9b8ff !important; font-weight:900 !important; box-shadow:0 0 16px #a866ff66 !important; }
 @media (max-width:720px) { .game-toolbar .crystal-shop-button { order:2; flex:1; }.game-toolbar .clash-crystals { order:1; }.game-toolbar .clash-online-button { order:4; } }
 .player-name-button { display:block; margin:10px auto; padding:10px 20px; border:2px solid #ffe18c; border-radius:999px; background:#5f4214; color:#fff; font-weight:900; cursor:pointer; box-shadow:0 0 13px #ffc84c55; }
+.game-rating { margin:22px auto 0; padding:16px; max-width:480px; border:1px solid #ffd96a66; border-radius:18px; background:#171b20; color:#fff; text-align:center; }
+.game-rating div { display:flex; justify-content:center; gap:7px; margin:8px 0; }.game-rating button { border:0; background:transparent; color:#69717b; font-size:32px; cursor:pointer; }.game-rating button.selected { color:#ffd447; text-shadow:0 0 10px #ffbe2e; }.game-rating span { color:#9ce4b8; font-weight:800; }
