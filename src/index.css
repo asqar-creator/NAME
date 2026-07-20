@@ -502,3 +502,4 @@ button { font: inherit; }
 .clash-crystals { padding:10px 16px; border:2px solid #a8e8ff; border-radius:999px; background:#164c72; color:#fff; box-shadow:0 0 14px #55c8ff66; white-space:nowrap; }
 .crystal-minion { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:7px 0; padding:9px 12px; border:1px solid #9edfff55; border-radius:12px; background:#142c3d; color:#fff; font-weight:800; }
 .crystal-minion button { min-width:90px; }
+.crystal-minion span { display:grid; gap:2px; }.crystal-minion small { color:#a9c7d7; font-size:11px; }
