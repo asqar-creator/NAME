@@ -8,12 +8,13 @@ type MinionShopProps = {
   enemy?: boolean;
   askarUnlocked?: boolean;
   unlockedCount?: number;
+  ownedNames?: string[];
   onSummon: (index: number) => void;
 };
 
-export function MinionShop({ coins, disabled, title = 'Синий игрок', enemy = false, askarUnlocked = false, unlockedCount, onSummon }: MinionShopProps) {
+export function MinionShop({ coins, disabled, title = 'Синий игрок', enemy = false, askarUnlocked = false, unlockedCount, ownedNames, onSummon }: MinionShopProps) {
   const [purchaseMessage, setPurchaseMessage] = useState('');
-  const availableMinions = MINIONS.filter((kind) => kind.name !== 'Аскар с мечом' || askarUnlocked);
+  const availableMinions = MINIONS.filter((kind) => (kind.name !== 'Аскар с мечом' || askarUnlocked) && (!ownedNames || ownedNames.includes(kind.name) || kind.name === 'Аскар с мечом'));
   const visibleMinions = unlockedCount === undefined ? availableMinions : availableMinions.slice(0, Math.max(3, unlockedCount));
   return <section className={`shop${enemy ? ' shop--enemy' : ''}`}>
     <div className="shop__title"><h2>🛒 Магазин минионов · {title}</h2><span>🪙 {coins} · +2 / сек</span></div>

@@ -5,6 +5,7 @@ import { BattleItems } from '../components/BattleItems';
 import { useBattle } from '../lib/useBattle';
 import { startGameMusic, stopGameMusic } from '../lib/gameAudio';
 import { ClashAction, ClashRole, useClashRoom } from '../lib/useClashRoom';
+import { MINIONS } from '../lib/game';
 
 export function GamePage({ onHome }: { onHome: () => void }) {
   const [mode, setMode] = useState<'bot' | 'local' | 'online'>('bot');
@@ -16,6 +17,8 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const [showResult, setShowResult] = useState(false);
   const [level, setLevel] = useState(() => Number(localStorage.getItem('clash-bot-level')) || 1);
   const [crystals, setCrystals] = useState(() => Number(localStorage.getItem('clash-crystals')) || 0);
+  const [crystalShopOpen, setCrystalShopOpen] = useState(false);
+  const [ownedMinions, setOwnedMinions] = useState<string[]>(() => { const saved = localStorage.getItem('clash-owned-minions'); return saved ? JSON.parse(saved) as string[] : MINIONS.slice(0, 3).map((kind) => kind.name); });
   const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => localStorage.getItem('clash-askar-sword-unlocked') === 'yes');
   const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1);
@@ -30,9 +33,10 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const createOnlineRoom = () => { const code = Math.random().toString(36).slice(2, 8).toUpperCase(); setOnlineRole('host'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const joinOnlineRoom = () => { const code = roomInput.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase(); if (!code) return; setOnlineRole('guest'); setRoomInput(code); setRoomCode(code); setMode('online'); restart(); };
   const onlineSummon = (index: number) => { if (onlineRole === 'host') summon(index, 'player'); else sendAction({ type: 'summon', index, side: 'enemy' }); };
+  const buyMinionForever = (name: string) => { if (crystals < 5 || ownedMinions.includes(name)) return; const next = [...ownedMinions, name]; setOwnedMinions(next); setCrystals((value) => { const balance = value - 5; localStorage.setItem('clash-crystals', String(balance)); return balance; }); localStorage.setItem('clash-owned-minions', JSON.stringify(next)); };
 
   return <main className="game-shell">
-    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><strong className="clash-crystals">💎 {crystals}</strong><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
+    <div className="game-toolbar"><button className="back-button" onClick={() => { stopGameMusic(); onHome(); }}>← Главная</button><button className="clash-crystals" onClick={() => setCrystalShopOpen(true)}>💎 {crystals} · Магазин</button><button className="clash-online-button" onClick={() => setOnlineOpen(true)}>🌐 ИГРАТЬ ОНЛАЙН</button><button className="sound-button" onClick={() => { if (soundOn) stopGameMusic(); else startGameMusic(); setSoundOn(!soundOn); }}>{soundOn ? '🔊 Звук включён' : '🔇 Включить звук'}</button></div>
     <header className="game-header">
       <div><span className="eyebrow">АВТОБИТВА · УРОВЕНЬ {level}</span><h1>Битва баз</h1><p>Создавай армию, прорвись через линию и уничтожь красную крепость. Каждый уровень сложнее предыдущего.</p></div>
       <div className="mode-switch">
@@ -45,7 +49,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     <Battlefield game={game} />
     <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
-      {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} onSummon={(index) => summon(index, 'player')} />}
+      {mode !== 'online' && <MinionShop coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} ownedNames={ownedMinions} onSummon={(index) => summon(index, 'player')} />}
       {mode === 'online' && <MinionShop title={onlineRole === 'host' ? 'Синий игрок — вы' : 'Красный игрок — вы'} enemy={onlineRole === 'guest'} coins={onlineRole === 'host' ? game.coins : game.enemyCoins} disabled={finished || !opponentOnline} askarUnlocked={onlineRole === 'host' && askarUnlocked} onSummon={onlineSummon} />}
       {mode === 'local' && <MinionShop title="Красный игрок" enemy coins={game.enemyCoins} disabled={finished} askarUnlocked={false} onSummon={(index) => summon(index, 'enemy')} />}
     </div>
@@ -57,5 +61,6 @@ export function GamePage({ onHome }: { onHome: () => void }) {
       <p>{game.winner === 'player' ? mode === 'bot' ? `🎉 Ура! Ты прошёл уровень ${Math.max(1, level - 1)} и получил 💎 5 кристаллов! Следующий уровень ${level} будет сложнее.` : '🎉 Ура! Вражеская крепость пала — ты победил!' : 'Попробуй снова: собери новую армию и защити свою базу.'}</p>
       <button onClick={restart}>Новая битва</button>
     </div></div>}
+    {crystalShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setCrystalShopOpen(false)}>×</button><h2>💎 Магазин кристаллов</h2><p>Твои кристаллы: <b>💎 {crystals}</b>. Первые три миниона бесплатные.</p>{MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').map((kind) => { const owned = ownedMinions.includes(kind.name); return <div className="crystal-minion" key={kind.name}><span>{kind.icon} {kind.name}</span><button disabled={owned || crystals < 5} onClick={() => buyMinionForever(kind.name)}>{owned ? 'Куплен' : '💎 5'}</button></div>; })}</section></div>}
   </main>;
 }
