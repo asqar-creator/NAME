@@ -48,7 +48,7 @@ export default function App() {
   };
 
   if (!authReady) return <main className="auth-loading">Загрузка…</main>;
-  if (!session && !guest) return <Auth onGuest={() => { localStorage.setItem('games-guest-mode', 'yes'); localStorage.setItem('games-welcome-message', '🎮 Ура! Ты вошёл как гость!'); setGuest(true); }} />;
+  if (!session && !guest) return <Auth onGuest={() => { localStorage.setItem('games-guest-mode', 'yes'); setGuest(true); }} />;
 
   const logout = () => { if (guest) { localStorage.removeItem('games-guest-mode'); setGuest(false); } else void supabase.auth.signOut(); };
 
