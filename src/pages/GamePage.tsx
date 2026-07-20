@@ -25,7 +25,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
   const levelAdvanced = useRef(false);
   const [askarUnlocked, setAskarUnlocked] = useState(() => MINIONS.filter((kind) => kind.name !== 'Аскар с мечом').every((kind) => ownedMinions.includes(kind.name)));
   const [askarUnlockNotice, setAskarUnlockNotice] = useState(false);
-  const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1);
+  const { game, summon, useItem, restart, replaceGame } = useBattle(mode === 'bot' ? 'bot' : 'local', mode === 'online' && onlineRole === 'guest', mode === 'bot' ? level : 1, askarUnlocked ? [...ownedMinions, 'Аскар с мечом'] : ownedMinions);
   const applyOnlineAction = (action: ClashAction) => { if (action.type === 'summon') summon(action.index, action.side); else if (action.type === 'item') useItem(action.kind, action.side); else restart(); };
   const { connected, opponentOnline, sendAction, sendState } = useClashRoom(roomCode, onlineRole, applyOnlineAction, replaceGame);
   const finished = game.winner !== null;

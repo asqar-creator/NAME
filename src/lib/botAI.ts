@@ -29,8 +29,8 @@ export function useBotSpell(game: GameState) {
   return false;
 }
 
-export function chooseBotMinion(game: GameState, unlockedCount = MINIONS.length): MinionKind | null {
-  const unlocked = MINIONS.slice(0, Math.max(3, unlockedCount));
+export function chooseBotMinion(game: GameState, unlockedRoster: number | string[] = MINIONS.length): MinionKind | null {
+  const unlocked = Array.isArray(unlockedRoster) ? MINIONS.filter((kind) => unlockedRoster.includes(kind.name)) : MINIONS.slice(0, Math.max(3, unlockedRoster));
   const pick = (name: string) => unlocked.find((kind) => kind.name === name);
   const players = game.units.filter((unit) => unit.side === 'player' && unit.name !== 'Тень');
   const allies = game.units.filter((unit) => unit.side === 'enemy' && unit.name !== 'Тень');
