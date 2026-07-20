@@ -63,7 +63,7 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
   const buy = (id: string, name: string, price: number) => { if (gold < price) return; setGold((value) => value - price); addItem(id, name); };
   const shopPrice = (price: number) => Math.ceil(price * (1 - discount));
   const bargain = () => { if (bargainText) return; const success = Math.random() > .35; if (success) { const value = Math.random() > .55 ? .2 : .1; setDiscount(value); setBargainText(`Мирон согласился! Скидка ${value * 100}%.`); } else setBargainText('Мирон не согласился снизить цену.'); };
-  const sellPrices: Record<string, number> = { tower_key: 20, pickaxe: 15, potion: 8, iron_sword: 18 };
+  const sellPrices: Record<string, number> = { tower_key: 40, pickaxe: 30, potion: 15, iron_sword: 25 };
   const removeItem = (id: string) => setItems((old) => old.flatMap((item) => item.id !== id ? [item] : item.amount > 1 ? [{ ...item, amount: item.amount - 1 }] : []));
   const sell = (id: string) => { const price = sellPrices[id] ?? 5; removeItem(id); if (equippedItem === id) setEquippedItem(''); setGold((value) => value + price); };
   const useItem = (item: Item) => {
