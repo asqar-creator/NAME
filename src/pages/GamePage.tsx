@@ -54,7 +54,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     <details className="game-story"><summary>📖 Новая история «Клеш оф Минионс»</summary><p>В ночь Великого Затмения Злой Аскар оживил Красную крепость и отправил тёмных двойников семьи захватить все королевства. Герой Аскар, Айжулдыз, Жансая, Мама и Папа объединились с минионами. Теперь им предстоит выдержать последнюю битву, освободить Кристалл Радости и вернуть свет каждой земле.</p></details>
     <button className="player-name-button" onClick={() => setNameOpen(true)}>⭐ {playerName}</button>
     {askarUnlockNotice && <div className="step-success" role="status">⚔️ Аскар с мечом разблокирован! Ты собрал всех минионов и всю семью.</div>}
-    <Battlefield game={game} />
+    <Battlefield game={game} playerName={playerName} />
     <BattleItems coins={mode === 'online' && onlineRole === 'guest' ? game.enemyCoins : game.coins} disabled={finished || (mode === 'online' && !opponentOnline)} onUse={(kind) => { if (mode === 'online' && onlineRole === 'guest') sendAction({ type: 'item', kind, side: 'enemy' }); else useItem(kind, 'player'); }} />
     <div className={`shops${mode === 'local' ? ' shops--two' : ''}`}>
       {mode !== 'online' && <MinionShop title={playerName} coins={game.coins} disabled={finished} askarUnlocked={askarUnlocked} ownedNames={ownedMinions} onSummon={(index) => summon(index, 'player')} />}

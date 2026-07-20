@@ -23,22 +23,23 @@ function Fighter({ unit }: { unit: Unit }) {
   </div>;
 }
 
-function AskarHero({ cooldown, evil = false, victory = false, defeated = false }: { cooldown: number; evil?: boolean; victory?: boolean; defeated?: boolean }) {
-  return <div className={`askar-hero${evil ? ' askar-hero--evil' : ''}${victory ? ' askar-hero--finisher' : ''}${defeated ? ' askar-hero--defeated' : ''}`} aria-label={evil ? 'Злой Аскар' : 'Герой Аскар'}>
-    <span className="askar-hero__title">{evil ? 'Злой Аскар' : 'Герой Аскар'}</span>
+function AskarHero({ cooldown, playerName, evil = false, victory = false, defeated = false }: { cooldown: number; playerName: string; evil?: boolean; victory?: boolean; defeated?: boolean }) {
+  const title = `${evil ? 'Злодей' : 'Герой'} ${playerName}`;
+  return <div className={`askar-hero${evil ? ' askar-hero--evil' : ''}${victory ? ' askar-hero--finisher' : ''}${defeated ? ' askar-hero--defeated' : ''}`} aria-label={title}>
+    <span className="askar-hero__title">{title}</span>
     <span className={`askar-hero__ban${cooldown <= 0 ? ' askar-hero__ban--ready' : ''}`}>{cooldown <= 0 ? '🔨 Бан готов' : `Бан: ${Math.ceil(cooldown)} с`}</span>
     <span className="askar-hero__head"><i className="askar-hero__hair" /><i className="askar-hero__eyes" /><i className="askar-hero__mouth" /></span>
     <span className="askar-hero__body">★</span><span className="askar-hero__sword">⚔</span>
   </div>;
 }
 
-export function Battlefield({ game }: { game: GameState }) {
+export function Battlefield({ game, playerName = 'Звезда' }: { game: GameState; playerName?: string }) {
   return <section className={`battlefield${game.winner === 'player' ? ' battlefield--victory' : ''}`} aria-label="Трёхмерное поле боя"><div className="world3d">
     <div className="sky3d"><div className="sun3d" /><div className="cloud3d cloud3d--one" /><div className="cloud3d cloud3d--two" /></div>
     <div className="mountains3d" /><div className="ground3d"><div className="lane3d" /></div>
     <Base side="player" hp={game.playerBase} /><Base side="enemy" hp={game.enemyBase} />
-    <AskarHero cooldown={game.heroBanCooldown} victory={game.winner === 'player'} />
-    <AskarHero cooldown={game.enemyHeroBanCooldown} evil defeated={game.winner === 'player'} />
+    <AskarHero cooldown={game.heroBanCooldown} playerName={playerName} victory={game.winner === 'player'} />
+    <AskarHero cooldown={game.enemyHeroBanCooldown} playerName={playerName} evil defeated={game.winner === 'player'} />
     {game.winner === 'player' && <div className="aizhuldyz-final"><span>Айжулдыз</span><b>👧</b><i /></div>}
     {game.winner === 'player' && <div className="zhansaya-final"><span>Жансая</span><b>👧</b><i>🍜</i></div>}
     {game.winner === 'player' && <div className="mother-final"><span>Мама радуется!</span><b>👩</b><i>💗✨💗</i></div>}
