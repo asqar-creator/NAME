@@ -58,6 +58,9 @@ export function chooseBotMinion(game: GameState, unlockedCount = MINIONS.length)
   const warlock = pick('Колдун теней');
   if (game.enemyCoins >= 90 && game.enemyBase > 45 && canBuy(warlock, game.enemyCoins)) return warlock;
 
+  const swordAskar = pick('Аскар с мечом');
+  if (unlocked.length === MINIONS.length && game.enemyCoins >= 100 && canBuy(swordAskar, game.enemyCoins)) return swordAskar;
+
   const dragon = pick('Дракон');
   if (game.enemyCoins >= 50 && game.enemyBase > 35 && canBuy(dragon, game.enemyCoins)) return dragon;
 
