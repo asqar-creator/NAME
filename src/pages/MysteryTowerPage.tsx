@@ -6,6 +6,16 @@ type Item = { id: string; name: string; amount: number };
 type SaveData = { gold: number; items: Item[]; world: string; position: [number, number, number]; skin?: string; ownedSkins?: string[]; playerHealth?: number; monsterHealth?: number; monsterAlive?: boolean; towerChestOpened?: boolean; unlockedWorlds?: string[]; equippedItem?: string };
 type Interaction = { id: string; label: string; x: number; z: number };
 const SAVE_KEY = 'mystery-tower-web-save';
+const TUTORIAL_STEPS = [
+  { title: 'Добро пожаловать!', text: 'Исследуй деревню и раскрой тайну Заброшенной башни.' },
+  { title: 'Движение', text: 'Используй WASD или стрелки. Shift — бег, Space — прыжок.' },
+  { title: 'Действие', text: 'Подойди к человеку или предмету и нажми E.' },
+  { title: 'Торговец Мирон', text: 'У Мирона можно покупать, продавать и торговаться. Баланс монет виден в магазине.' },
+  { title: 'Инвентарь', text: 'Нажми I: зелья можно выпить, а меч или кирку — взять в руки.' },
+  { title: 'Сражение', text: 'Подойди к врагу и нажимай F. Следи за HP и используй зелья.' },
+  { title: 'Сохранение', text: 'Нажми «Сохранить» или F5. Загрузка — кнопкой или клавишей F9.' },
+  { title: 'Новые миры', text: 'Побеждай боссов, забирай кристаллы и открывай порталы по порядку.' },
+];
 const SKINS = [{ id: 'traveler', name: 'Путник', color: 0x286dcc, price: 0 }, { id: 'knight', name: 'Рыцарь', color: 0x646c7c, price: 80 }, { id: 'mage', name: 'Маг', color: 0x7041a8, price: 120 }, { id: 'forest', name: 'Хранитель леса', color: 0x35754b, price: 160 }, { id: 'royal', name: 'Королевский герой', color: 0xc13f4f, price: 250 }];
 const WORLD_SEQUENCE = [
   { id: 'candy', name: 'Сладкий мир', x: -100, color: 0xf2a7c7 }, { id: 'desert', name: 'Пустыня', x: -180, color: 0xd9a34f },
@@ -34,6 +44,8 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [onlineOpen, setOnlineOpen] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(() => localStorage.getItem('tower-tutorial-seen') !== 'yes');
+  const [tutorialStep, setTutorialStep] = useState(0);
   const [roomInput, setRoomInput] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const { connected, partnerOnline, partnerPosition, sendPosition } = useTwoPlayerRoom(roomCode);
@@ -155,6 +167,8 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
     box('Верх портала', [0, 5.1, -36.55], [5.6, 1.1, 1.2], 0x55535a);
     for (let i = 0; i < 7; i++) box('Ступень башни', [0, .12 + i * .08, -35 + i * .48], [5 - i * .28, .25, .65], 0x5c5a60);
     for (let i = 0; i < 7; i++) box('Портал', [20, 1.6, 25 - i * 10], [2.5, 3.2, .7], new THREE.Color().setHSL(i / 7, .65, .5).getHex());
+    const makePortalLabel = (text: string, x: number, y: number, z: number) => { const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 96; const context = canvas.getContext('2d')!; context.fillStyle = '#07121ddd'; context.roundRect(4, 4, 504, 88, 24); context.fill(); context.strokeStyle = '#ffe28a'; context.lineWidth = 5; context.stroke(); context.fillStyle = '#ffffff'; context.font = 'bold 30px Arial'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 256, 49); const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthTest: false })); sprite.position.set(x, y, z); sprite.scale.set(8.5, 1.6, 1); sprite.renderOrder = 20; scene.add(sprite); };
+    WORLD_SEQUENCE.forEach((entry, index) => makePortalLabel(entry.name, 20, 4.3, 25 - index * 10));
     // Первый открываемый мир — яркая земля сладостей.
     box('Земля Сладкого мира', [-100, -.55, 0], [65, 1, 65], 0xf2a7c7); box('Шоколадная дорога', [-100, -.02, 0], [7, .12, 55], 0x75422d);
     for (let i = 0; i < 14; i++) { const angle = i / 14 * Math.PI * 2; const x = -100 + Math.sin(angle) * 22; const z = Math.cos(angle) * 22; cylinder('Палочка леденца', [x, 2, z], .16, 4, 0xffffff); const candy = new THREE.Mesh(new THREE.TorusGeometry(1.25, .34, 8, 22), material(i % 2 ? 0xff4f91 : 0x6bd9ff)); candy.position.set(x, 4.2, z); candy.rotation.x = Math.PI / 2; scene.add(candy); }
@@ -307,5 +321,7 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
     {inventoryOpen && <div className="tower-window"><section><button className="close" onClick={() => setInventoryOpen(false)}>×</button><h2>🎒 Инвентарь</h2>{equippedItem && <p>В руках: <b>{items.find((item) => item.id === equippedItem)?.name ?? 'предмет'}</b></p>}{items.length ? items.map((item) => <div className="tower-inventory-item" key={item.id}><span>{item.name} ×{item.amount}{equippedItem === item.id ? ' ✓' : ''}</span><button onClick={() => useItem(item)}>{item.id === 'potion' ? 'Использовать' : item.id === 'iron_sword' || item.id === 'pickaxe' ? 'Взять в руки' : 'Осмотреть'}</button><button onClick={() => sell(item.id)}>Продать за {sellPrices[item.id] ?? 5} 🪙</button></div>) : <p>Сумка пока пуста.</p>}</section></div>}
     {skinShopOpen && <div className="tower-window"><section><button className="close" onClick={() => setSkinShopOpen(false)}>×</button><h2>🎭 Магазин скинов</h2><p>Выбран: {getSkin(skin).name}</p>{SKINS.map((entry) => { const owned = ownedSkins.includes(entry.id); return <div className="tower-skin" key={entry.id}><i style={{ background: `#${entry.color.toString(16).padStart(6, '0')}` }} /><span>{entry.name}</span><button onClick={() => chooseSkin(entry.id)} disabled={skin === entry.id}>{skin === entry.id ? 'Надет' : owned ? 'Надеть' : `${entry.price} 🪙`}</button></div>; })}</section></div>}
     {shopOpen && <div className="miron-money" role="status"><span>Твои деньги</span><b>🪙 {gold}</b></div>}
+    <button className="tower-tutorial-button" onClick={() => { setTutorialStep(0); setTutorialOpen(true); }}>❓ Туториал</button>
+    {tutorialOpen && <div className="tower-tutorial"><section><small>ШАГ {tutorialStep + 1} / {TUTORIAL_STEPS.length}</small><h2>{TUTORIAL_STEPS[tutorialStep].title}</h2><p>{TUTORIAL_STEPS[tutorialStep].text}</p><div><button onClick={() => { localStorage.setItem('tower-tutorial-seen', 'yes'); setTutorialOpen(false); setTutorialStep(0); }}>Пропустить</button>{tutorialStep > 0 && <button onClick={() => setTutorialStep((step) => step - 1)}>Назад</button>}<button onClick={() => { if (tutorialStep === TUTORIAL_STEPS.length - 1) { localStorage.setItem('tower-tutorial-seen', 'yes'); setTutorialOpen(false); setTutorialStep(0); } else setTutorialStep((step) => step + 1); }}>{tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Начать игру!' : 'Дальше'}</button></div></section></div>}
   </main>;
 }
