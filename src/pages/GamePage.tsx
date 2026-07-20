@@ -53,7 +53,7 @@ export function GamePage({ onHome }: { onHome: () => void }) {
     {showResult && <div className="result" role="dialog" aria-modal="true"><div className="result__card">
       <span>{game.winner === 'player' ? '🏆' : '💥'}</span>
       <h2>{game.winner === 'player' ? 'Синий игрок победил!' : mode === 'local' ? 'Красный игрок победил!' : 'База разрушена'}</h2>
-      <p>{game.winner === 'player' ? 'Вражеская крепость пала. Новый герой «Аскар с мечом» открыт в магазине!' : 'Собери новую армию и попробуй ещё раз.'}</p>
+      <p>{game.winner === 'player' ? mode === 'bot' ? `🎉 Ура! Ты прошёл уровень ${Math.max(1, level - 1)}! Открыт новый персонаж. Следующий уровень: ${level}.` : '🎉 Ура! Вражеская крепость пала — ты победил!' : 'Попробуй снова: собери новую армию и защити свою базу.'}</p>
       <button onClick={restart}>Новая битва</button>
     </div></div>}
   </main>;

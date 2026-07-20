@@ -28,7 +28,9 @@ export function Auth({ onGuest }: { onGuest: () => void }) {
     if (error) {
       setMessage(error.message);
     } else if (mode === 'signup' && !data.session) {
-      setMessage('Аккаунт создан! Проверь почту и подтверди регистрацию.');
+      setMessage('🎉 Ура! Ты успешно зарегистрировался! Проверь почту и подтверди регистрацию.');
+    } else if (data.session) {
+      localStorage.setItem('games-welcome-message', mode === 'signup' ? '🎉 Ты успешно зарегистрировался!' : '✅ Ты успешно вошёл!');
     }
     setBusy(false);
   }

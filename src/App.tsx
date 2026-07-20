@@ -13,12 +13,22 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [guest, setGuest] = useState(() => localStorage.getItem('games-guest-mode') === 'yes');
   const [authReady, setAuthReady] = useState(false);
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     const updatePath = () => setPath(window.location.pathname);
     window.addEventListener('popstate', updatePath);
     return () => window.removeEventListener('popstate', updatePath);
   }, []);
+
+  useEffect(() => {
+    const message = localStorage.getItem('games-welcome-message');
+    if (!message) return;
+    localStorage.removeItem('games-welcome-message');
+    setNotice(message);
+    const timer = window.setTimeout(() => setNotice(''), 3500);
+    return () => window.clearTimeout(timer);
+  }, [session, guest]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,7 +48,7 @@ export default function App() {
   };
 
   if (!authReady) return <main className="auth-loading">Загрузка…</main>;
-  if (!session && !guest) return <Auth onGuest={() => { localStorage.setItem('games-guest-mode', 'yes'); setGuest(true); }} />;
+  if (!session && !guest) return <Auth onGuest={() => { localStorage.setItem('games-guest-mode', 'yes'); localStorage.setItem('games-welcome-message', '🎮 Ура! Ты вошёл как гость!'); setGuest(true); }} />;
 
   const logout = () => { if (guest) { localStorage.removeItem('games-guest-mode'); setGuest(false); } else void supabase.auth.signOut(); };
 
@@ -49,5 +59,5 @@ export default function App() {
   if (path === '/adventure') page = <AdventurePage onHome={() => navigate('/')} />;
   if (path === '/elemental-merge') page = <ElementalMergePage onHome={() => navigate('/')} />;
   if (path === '/mystery-tower') page = <MysteryTowerPage onHome={() => navigate('/')} />;
-  return <>{accountButton}{page}</>;
+  return <>{accountButton}{notice && <div className="step-success" role="status">{notice}</div>}{page}</>;
 }
