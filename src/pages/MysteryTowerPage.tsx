@@ -93,6 +93,7 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
   const chooseSkin = (id: string) => { const entry = getSkin(id); if (ownedSkins.includes(id)) { setSkin(id); return; } if (gold < entry.price) return; setGold((value) => value - entry.price); setOwnedSkins((old) => [...old, id]); setSkin(id); };
 
   useEffect(() => { const quickSave = () => save(); window.addEventListener('save-all-games', quickSave); return () => window.removeEventListener('save-all-games', quickSave); });
+  useEffect(() => { const secretLoad = () => load(); window.addEventListener('load-all-games', secretLoad); return () => window.removeEventListener('load-all-games', secretLoad); });
 
   useEffect(() => {
     const mount = mountRef.current; if (!mount) return;

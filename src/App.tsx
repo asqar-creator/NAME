@@ -26,6 +26,8 @@ export default function App() {
 
   useEffect(() => { const quickSave = (event: KeyboardEvent) => { if (!event.ctrlKey || !event.altKey || event.code !== 'KeyQ') return; event.preventDefault(); window.dispatchEvent(new Event('save-all-games')); localStorage.setItem('games-last-quick-save', new Date().toISOString()); setNotice('💾 Прогресс сохранён!'); window.setTimeout(() => setNotice(''), 2500); }; window.addEventListener('keydown', quickSave); return () => window.removeEventListener('keydown', quickSave); }, []);
 
+  useEffect(() => { const secretLoad = (event: KeyboardEvent) => { if (!event.ctrlKey || !event.altKey || event.code !== 'KeyE') return; event.preventDefault(); window.dispatchEvent(new Event('load-all-games')); if (window.location.pathname === '/game' || window.location.pathname === '/elemental-merge') { localStorage.setItem('games-welcome-message', '✨ Прогресс восстановлен!'); window.location.reload(); return; } setNotice('✨ Прогресс восстановлен!'); window.setTimeout(() => setNotice(''), 2500); }; window.addEventListener('keydown', secretLoad); return () => window.removeEventListener('keydown', secretLoad); }, []);
+
   useEffect(() => {
     const message = localStorage.getItem('games-welcome-message');
     if (!message) return;
