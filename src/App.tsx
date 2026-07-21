@@ -24,6 +24,8 @@ export default function App() {
 
   useEffect(() => { const update = () => setOnline(navigator.onLine); window.addEventListener('online', update); window.addEventListener('offline', update); return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); }; }, []);
 
+  useEffect(() => { const quickSave = (event: KeyboardEvent) => { if (!event.ctrlKey || !event.altKey || event.code !== 'KeyQ') return; event.preventDefault(); window.dispatchEvent(new Event('save-all-games')); localStorage.setItem('games-last-quick-save', new Date().toISOString()); setNotice('💾 Прогресс сохранён!'); window.setTimeout(() => setNotice(''), 2500); }; window.addEventListener('keydown', quickSave); return () => window.removeEventListener('keydown', quickSave); }, []);
+
   useEffect(() => {
     const message = localStorage.getItem('games-welcome-message');
     if (!message) return;

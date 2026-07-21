@@ -92,6 +92,8 @@ export function MysteryTowerPage({ onHome }: { onHome: () => void }) {
   const getSkin = (id: string) => SKINS.find((entry) => entry.id === id) ?? SKINS[0];
   const chooseSkin = (id: string) => { const entry = getSkin(id); if (ownedSkins.includes(id)) { setSkin(id); return; } if (gold < entry.price) return; setGold((value) => value - entry.price); setOwnedSkins((old) => [...old, id]); setSkin(id); };
 
+  useEffect(() => { const quickSave = () => save(); window.addEventListener('save-all-games', quickSave); return () => window.removeEventListener('save-all-games', quickSave); });
+
   useEffect(() => {
     const mount = mountRef.current; if (!mount) return;
     const scene = new THREE.Scene(); scene.background = new THREE.Color(0x9bd8ff); scene.fog = new THREE.Fog(0x9bd8ff, 35, 105);

@@ -4,6 +4,7 @@ const gems = [{ x: 27, y: 29 }, { x: 72, y: 28 }, { x: 30, y: 48 }, { x: 68, y: 
 const makeBosses = (level: number) => Array.from({ length: level < 2 ? 0 : Math.min(3, 1 + Math.floor((level - 2) / 2)) }, (_, i) => ({ x: 25 + i * 25, y: 14 + i * 5 }));
 type IslandBoss = { x: number; y: number; hp: number; maxHp: number; kind: 'captain' | 'demogorgon' } | null;
 type Difficulty = 'easy' | 'normal' | 'hard';
+const ADVENTURE_SAVE_KEY = 'adventure-quick-save';
 const levelTime = (level: number, difficulty: Difficulty) => Math.max(20, 70 - (level - 1) * 7 + (difficulty === 'easy' ? 20 : difficulty === 'hard' ? -15 : 0));
 const skins = [{ id: '🧑', name: 'Исследователь', cost: 0 }, { id: '🧙', name: 'Маг', cost: 5 }, { id: '🥷', name: 'Ниндзя', cost: 10 }, { id: '🦸', name: 'Супергерой', cost: 18 }];
 const weapons = [{ id: '⚔️', name: 'Меч', cost: 0 }, { id: '🪓', name: 'Топор', cost: 8 }, { id: '🗡️', name: 'Золотой меч', cost: 15 }, { id: '🔱', name: 'Трезубец волн', cost: 60 }];
@@ -32,6 +33,9 @@ export function AdventurePage({ onHome }: { onHome: () => void }) {
   const keys = useMemo(() => new Set<string>(), []);
   const activeGems = gems.slice(0, Math.min(gems.length, 4 + level));
   const bossTier = Math.max(1, Math.floor(level / 3));
+
+  useEffect(() => { try { const raw = localStorage.getItem(ADVENTURE_SAVE_KEY); if (!raw) return; const data = JSON.parse(raw) as { level?: number; gold?: number; crystalBank?: number; ownedSkins?: string[]; ownedWeapons?: string[]; skin?: string; weapon?: string; lives?: number; difficulty?: Difficulty; player?: { x: number; y: number } }; setLevel(data.level ?? 1); setGold(data.gold ?? 3); setCrystalBank(data.crystalBank ?? 0); setOwnedSkins(data.ownedSkins ?? ['🧑']); setOwnedWeapons(data.ownedWeapons ?? ['⚔️']); setSkin(data.skin ?? '🧑'); setWeapon(data.weapon ?? '⚔️'); setLives(data.lives ?? 5); setDifficulty(data.difficulty ?? 'normal'); if (data.player) setPlayer(data.player); } catch { localStorage.removeItem(ADVENTURE_SAVE_KEY); } }, []);
+  useEffect(() => { const quickSave = () => localStorage.setItem(ADVENTURE_SAVE_KEY, JSON.stringify({ level, gold, crystalBank, ownedSkins, ownedWeapons, skin, weapon, lives, difficulty, player })); window.addEventListener('save-all-games', quickSave); return () => window.removeEventListener('save-all-games', quickSave); }, [level, gold, crystalBank, ownedSkins, ownedWeapons, skin, weapon, lives, difficulty, player]);
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
