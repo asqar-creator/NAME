@@ -14,12 +14,15 @@ export default function App() {
   const [guest, setGuest] = useState(() => localStorage.getItem('games-guest-mode') === 'yes');
   const [authReady, setAuthReady] = useState(false);
   const [notice, setNotice] = useState('');
+  const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
     const updatePath = () => setPath(window.location.pathname);
     window.addEventListener('popstate', updatePath);
     return () => window.removeEventListener('popstate', updatePath);
   }, []);
+
+  useEffect(() => { const update = () => setOnline(navigator.onLine); window.addEventListener('online', update); window.addEventListener('offline', update); return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); }; }, []);
 
   useEffect(() => {
     const message = localStorage.getItem('games-welcome-message');
@@ -59,5 +62,5 @@ export default function App() {
   if (path === '/adventure') page = <AdventurePage onHome={() => navigate('/')} />;
   if (path === '/elemental-merge') page = <ElementalMergePage onHome={() => navigate('/')} />;
   if (path === '/mystery-tower') page = <MysteryTowerPage onHome={() => navigate('/')} />;
-  return <>{accountButton}{notice && <div className="step-success" role="status">{notice}</div>}{page}</>;
+  return <>{accountButton}{!online && <div className="offline-status">📴 Офлайн-режим · одиночные игры работают</div>}{notice && <div className="step-success" role="status">{notice}</div>}{page}</>;
 }

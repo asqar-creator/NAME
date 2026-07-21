@@ -1,0 +1,10 @@
+{
+  "name": "Игры Аскара",
+  "short_name": "Игры",
+  "description": "Коллекция игр, доступная офлайн",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#081018",
+  "theme_color": "#176b45",
+  "lang": "ru"
+}
